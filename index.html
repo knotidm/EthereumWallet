@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>Func Token Wallet</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet"
+          type="text/css">
+    <link rel="icon" type="image/png" href="public/favicon-32x32.png" sizes="32x32">
+    <script src="web3/web3.min.js"></script>
+    <script src="vue/vue.js"></script>
+
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body style="background-image: url(images/hero_bg.jpg)">
+
+<div id="wallet" class="col-lg-5">
+
+    <div><p class="page-header" style="color:wheat;">My Wallet</p></div>
+    <ul class="list-group">
+        <li class="list-group-item">Address {{ coinbase }}</li>
+        <li class="list-group-item">Eth Balance {{ balance }}</li>
+        <li class="list-group-item">Token Balance {{ tokens }}</li>
+    </ul>
+
+</div>
+
+<div id="sendTokens" class="col-lg-5">
+
+    <template>
+        <div><p class="page-header" style="color:wheat;">Buy Tokens</p></div>
+        <ul class="list-group">
+            <li class="list-group-item">
+                To Address
+                <label>
+                    <input class="form-control" type="text" v-model="addr">
+                </label>
+            </li>
+
+            <li class="list-group-item">
+                Amount
+                <label>
+                    <input type="number" v-model.number="amount">
+                </label>
+            </li>
+
+            <li class="list-group-item" style="text-align: center">
+                <button class="btn btn-primary btn-outline" v-on:click="sendTokens">Send</button>
+            </li>
+
+        </ul>
+
+    </template>
+</div>
+
+<div id="transactions" class="col-lg-5" s>
+
+    <template>
+        <div><p class="page-header" style="color:wheat;">Transactions</p></div>
+
+        <table :headers="headers" :items="items">
+            <template slot="items" slot-scope="props">
+                <td>{{ props.item.to }}</td>
+                <td>{{ props.item.from }}</td>
+                <td>{{ props.item.amount }}</td>
+            </template>
+        </table>
+
+    </template>
+</div>
+
+<?php
+header('Access-Control-Allow-Origin: *');
+?>
+
+<script>
+
+    // let web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+    // web3.eth.defaultAccount = web3.eth.accounts[2];
+    // console.log(web3.eth.defaultAccount);
+
+    const config = {
+        contractAddress: '0x41cE8c10a64Ff9CB975720F3EBFCE443400AF0f3',
+        contractAbi: [{
+            "constant": true,
+            "inputs": [],
+            "name": "name",
+            "outputs": [{"name": "", "type": "string"}],
+            "payable": false,
+            "type": "function"
+        }, {
+            "constant": false,
+            "inputs": [{"name": "_spender", "type": "address"}, {"name": "_value", "type": "uint256"}],
+            "name": "approve",
+            "outputs": [],
+            "payable": false,
+            "type": "function"
+        }, {
+            "constant": true,
+            "inputs": [],
+            "name": "totalSupply",
+            "outputs": [{"name": "", "type": "uint256"}],
+            "payable": false,
+            "type": "function"
+        }, {
+            "constant": false,
+            "inputs": [{"name": "_from", "type": "address"}, {"name": "_to", "type": "address"}, {
+                "name": "_value",
+                "type": "uint256"
+            }],
+            "name": "transferFrom",
+            "outputs": [],
+            "payable": false,
+            "type": "function"
+        }, {
+            "constant": true,
+            "inputs": [],
+            "name": "INITIAL_SUPPLY",
+            "outputs": [{"name": "", "type": "uint256"}],
+            "payable": false,
+            "type": "function"
+        }, {
+            "constant": true,
+            "inputs": [],
+            "name": "decimals",
+            "outputs": [{"name": "", "type": "uint256"}],
+            "payable": false,
+            "type": "function"
+        }, {
+            "constant": true,
+            "inputs": [{"name": "_owner", "type": "address"}],
+            "name": "balanceOf",
+            "outputs": [{"name": "balance", "type": "uint256"}],
+            "payable": false,
+            "type": "function"
+        }, {
+            "constant": true,
+            "inputs": [],
+            "name": "symbol",
+            "outputs": [{"name": "", "type": "string"}],
+            "payable": false,
+            "type": "function"
+        }, {
+            "constant": false,
+            "inputs": [{"name": "_to", "type": "address"}, {"name": "_value", "type": "uint256"}],
+            "name": "transfer",
+            "outputs": [],
+            "payable": false,
+            "type": "function"
+        }, {
+            "constant": true,
+            "inputs": [{"name": "_owner", "type": "address"}, {"name": "_spender", "type": "address"}],
+            "name": "allowance",
+            "outputs": [{"name": "remaining", "type": "uint256"}],
+            "payable": false,
+            "type": "function"
+        }, {"inputs": [], "payable": false, "type": "constructor"}, {
+            "anonymous": false,
+            "inputs": [{"indexed": true, "name": "owner", "type": "address"}, {
+                "indexed": true,
+                "name": "spender",
+                "type": "address"
+            }, {"indexed": false, "name": "value", "type": "uint256"}],
+            "name": "Approval",
+            "type": "event"
+        }, {
+            "anonymous": false,
+            "inputs": [{"indexed": true, "name": "from", "type": "address"}, {
+                "indexed": true,
+                "name": "to",
+                "type": "address"
+            }, {"indexed": false, "name": "value", "type": "uint256"}],
+            "name": "Transfer",
+            "type": "event"
+        }]
+    };
+
+    const contract = web3.eth.contract(config.contractAbi).at(config.contractAddress, (err, ctr) => {
+        return ctr
+    });
+
+
+    let wallet = new Vue({
+
+        el: '#wallet',
+
+        data() {
+            return {
+                coinbase: 0x00,
+                balance: 0,
+                tokens: 0
+            }
+        },
+
+        mounted() {
+            this.coinbase = contract._eth.coinbase;
+
+            this.getEtherBalance();
+            this.getTokenBalance();
+
+            contract.Transfer((err, res) => {
+                console.log("TRANSFER!");
+                this.getEtherBalance();
+                this.getTokenBalance()
+            });
+
+            // contract.allEvents({
+            //     // filter: {myIndexedParam: [20,23], myOtherIndexedParam: '0x123456789...'}, // Using an array means OR: e.g. 20 or 23
+            //     fromBlock: 0,
+            //     toBlock: 'latest'
+            // }, function (error, events) {
+            //     console.log(events);
+            // })
+
+
+        },
+
+        methods: {
+            getEtherBalance() {
+                contract._eth.getBalance(this.coinbase, (err, bal) => {
+                    if (!err) {
+                        this.balance = web3.fromWei(bal, 'ether').toNumber();
+                        return;
+                    }
+                    console.log(err)
+                })
+            },
+
+            getTokenBalance() {
+                contract.balanceOf(this.coinbase, (err, tkns) => {
+                    if (!err) {
+                        this.tokens = web3.fromWei(tkns, 'ether').toNumber();
+                        return;
+                    }
+                    console.log(err)
+                })
+            }
+        }
+    });
+
+    let sendTokens = new Vue({
+
+        el: '#sendTokens',
+
+        data() {
+            return {
+                addr: null,
+                amount: null
+            }
+        },
+
+        methods: {
+            sendTokens: function (event) {
+                if (!web3.isAddress(this.addr)) {
+                    alert('Invalid address!');
+                    this.addr = null;
+                    return
+                } else {
+                    console.log(this.addr);
+                }
+
+                if (this.amount <= 0) {
+                    alert('Invalid amount!');
+                    this.amount = null;
+                    return
+                }
+
+                let ether = web3.toWei(this.amount, 'ether');
+
+                contract.transfer(this.addr, ether, (err, res) => {
+                    if (!err) {
+                        console.log(res);
+                        this.addr = this.amount = null;
+                        return
+                    }
+                    console.log(err);
+                    this.addr = this.amount = null
+                })
+            }
+        }
+    });
+
+    let transactions = new Vue({
+
+        el: '#transactions',
+
+        data() {
+            return {
+                headers: [
+                    {align: 'left', text: 'To', value: 'to'},
+                    {align: 'left', text: 'From', value: 'from'},
+                    {align: 'left', text: 'Amount', value: 'amount'}
+                ],
+                items: []
+            }
+        },
+
+        mounted() {
+
+            // getTransactionsByAccount(web3.eth.coinbase);
+
+            web3.eth.filter({
+                address: web3.eth.coinbase,
+                from: 1,
+                to: 'latest'
+            }).get(function (err, result) {
+                console.log(result);
+            });
+
+            contract.Transfer({}, {fromBlock: 0, toBlock: 'pending'}, (err, res) => {
+                console.log(this.items);
+
+                if (res.args.to === contract._eth.coinbase || res.args.from === contract._eth.coinbase) {
+                    this.items.push({
+                        to: res.args.to,
+                        from: res.args.from,
+                        amount: web3.fromWei(res.args.value).toNumber()
+                    });
+                }
+            })
+        }
+    });
+
+    var loadJSON = "server/loadJSON.php";
+    var xmlHttpRequest = new XMLHttpRequest();
+    xmlHttpRequest.open("POST", loadJSON, true);
+    xmlHttpRequest.onreadystatechange = function () {
+        if (xmlHttpRequest.readyState === 4) {
+            if (xmlHttpRequest.status === 200) {
+                var object = JSON.parse(xmlHttpRequest.responseText);
+                console.log(object.result);
+            }
+        }
+    };
+    xmlHttpRequest.send(null);
+
+    function getTransactionsByAccount(myaccount, startBlockNumber, endBlockNumber) {
+        if (endBlockNumber == null) {
+            // web3.eth.getBlockNumber(
+            //
+            //     function(error, result){
+            //         endBlockNumber = result;
+            //
+            //     });
+            endBlockNumber = 1000;
+            console.log("Using endBlockNumber: " + endBlockNumber);
+        }
+        if (startBlockNumber == null) {
+            startBlockNumber = endBlockNumber - 1000;
+            console.log("Using startBlockNumber: " + startBlockNumber);
+        }
+        console.log("Searching for transactions to/from account \"" + myaccount + "\" within blocks " + startBlockNumber + " and " + endBlockNumber);
+
+        for (var i = startBlockNumber; i <= endBlockNumber; i++) {
+            if (i % 1000 == 0) {
+                console.log("Searching block " + i);
+            }
+            var block = web3.eth.getBlock(i, true);
+            if (block != null && block.transactions != null) {
+                block.transactions.forEach(function (e) {
+                    if (myaccount == "*" || myaccount == e.from || myaccount == e.to) {
+                        console.log("  tx hash          : " + e.hash + "\n"
+                            + "   nonce           : " + e.nonce + "\n"
+                            + "   blockHash       : " + e.blockHash + "\n"
+                            + "   blockNumber     : " + e.blockNumber + "\n"
+                            + "   transactionIndex: " + e.transactionIndex + "\n"
+                            + "   from            : " + e.from + "\n"
+                            + "   to              : " + e.to + "\n"
+                            + "   value           : " + e.value + "\n"
+                            + "   time            : " + block.timestamp + " " + new Date(block.timestamp * 1000).toGMTString() + "\n"
+                            + "   gasPrice        : " + e.gasPrice + "\n"
+                            + "   gas             : " + e.gas + "\n"
+                            + "   input           : " + e.input);
+                    }
+                })
+            }
+        }
+    }
+
+</script>
+
+</body>
+
+</html>
