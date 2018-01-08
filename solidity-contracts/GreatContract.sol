@@ -1,46 +1,51 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.18;
 
 contract GreatContract {
-    address owner;
-    uint public tokenPrice = 1 ether;
-    uint public numberOfAllTokens;
-    uint public numberOfAvailableTokens;
-    uint public numberOfSoldTokens;
-    mapping(address => uint) public purchasers;
-    uint256 public accountBalance;
+    address contractOwner;
+    uint256 tokenPrice;
+    uint256 public numberOfAllTokens;
+    uint256 public numberOfAvailableTokens;
+    uint256 public numberOfSoldTokens;
+    mapping(address => uint256) public purchasers;
 
-    function GreatContract(){
-        owner = msg.sender;
+    function GreatContract() public {
+        contractOwner = msg.sender;
+        tokenPrice = 0.79 ether;
         numberOfAllTokens = 12;
         numberOfAvailableTokens = numberOfAllTokens;
         numberOfSoldTokens = 0;
     }
 
-    modifier OnlyOwner{
-        require(msg.sender == owner);
+    modifier OnlyContractOwner{
+        require(msg.sender == contractOwner);
         _;
     }
 
-    function setAccountBalance() {
-        accountBalance = msg.sender.balance;
+    function getContractOwner() public constant returns (address) {
+        return (contractOwner);
     }
 
-    function setTokenPrice(uint value) OnlyOwner {
+    function setTokenPrice(uint256 value) public OnlyContractOwner {
         tokenPrice = value;
     }
 
-    function setNumberOfAllTokens(uint value) OnlyOwner {
+    function getTokenPrice() public constant returns (uint256) {
+        return (tokenPrice);
+    }
+
+    function setNumberOfAllTokens(uint256 value) public OnlyContractOwner {
         numberOfAllTokens = value;
         numberOfAvailableTokens = numberOfAllTokens - numberOfSoldTokens;
     }
 
-    function buyTokens(uint amount) payable {
-        if (msg.value != (amount * tokenPrice) || amount > numberOfAvailableTokens) {
+    function() public payable {
+        uint256 amount = msg.value / tokenPrice;
+        if (amount > numberOfAvailableTokens) {
             throw;
+        } else {
+            purchasers[msg.sender] += amount;
+            numberOfSoldTokens += amount;
+            numberOfAvailableTokens -= amount;
         }
-
-        purchasers[msg.sender] += amount;
-        numberOfSoldTokens += amount;
-        numberOfAvailableTokens -= amount;
     }
 }
