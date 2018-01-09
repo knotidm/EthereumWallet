@@ -1,12 +1,12 @@
 pragma solidity ^0.4.18;
 
 contract GreatContract {
-    address contractOwner;
+    address private contractOwner;
     uint256 tokenPrice;
     uint256 public numberOfAllTokens;
     uint256 public numberOfAvailableTokens;
     uint256 public numberOfSoldTokens;
-    mapping(address => uint256) public purchasers;
+    mapping(address => uint256) private purchasers;
 
     function GreatContract() public {
         contractOwner = msg.sender;
@@ -14,28 +14,6 @@ contract GreatContract {
         numberOfAllTokens = 12;
         numberOfAvailableTokens = numberOfAllTokens;
         numberOfSoldTokens = 0;
-    }
-
-    modifier OnlyContractOwner{
-        require(msg.sender == contractOwner);
-        _;
-    }
-
-    function getContractOwner() public constant returns (address) {
-        return (contractOwner);
-    }
-
-    function setTokenPrice(uint256 value) public OnlyContractOwner {
-        tokenPrice = value;
-    }
-
-    function getTokenPrice() public constant returns (uint256) {
-        return (tokenPrice);
-    }
-
-    function setNumberOfAllTokens(uint256 value) public OnlyContractOwner {
-        numberOfAllTokens = value;
-        numberOfAvailableTokens = numberOfAllTokens - numberOfSoldTokens;
     }
 
     function() public payable {
@@ -47,5 +25,31 @@ contract GreatContract {
             numberOfSoldTokens += amount;
             numberOfAvailableTokens -= amount;
         }
+    }
+
+    modifier OnlyContractOwner{
+        require(msg.sender == contractOwner);
+        _;
+    }
+
+    function getNumberOfTokens(address _address) constant returns (uint256) {
+        return purchasers[_address];
+    }
+
+    function getContractOwner() public constant returns (address) {
+        return (contractOwner);
+    }
+
+    function getTokenPrice() public constant returns (uint256) {
+        return (tokenPrice);
+    }
+
+    function setTokenPrice(uint256 value) public OnlyContractOwner {
+        tokenPrice = value;
+    }
+
+    function setNumberOfAllTokens(uint256 value) public OnlyContractOwner {
+        numberOfAllTokens = value;
+        numberOfAvailableTokens = numberOfAllTokens - numberOfSoldTokens;
     }
 }

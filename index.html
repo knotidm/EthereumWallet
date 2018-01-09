@@ -31,10 +31,9 @@
 <div id="buyTokens" class="col-lg-5">
     <p class="page-header" style="color:wheat;">Buy Tokens</p>
     <ul class="list-group">
-        <li class="list-group-item">Contract Owner Address <span id="contractOwnerAddress"/></li>
-        <li class="list-group-item">Amount <label><input type="number" v-model.number="amount"></label> Token Price
-            (ETH)
-            <span id="tokenPrice"/></li>
+        <!--<li class="list-group-item">Contract Owner Address <span id="contractOwnerAddress"/></li>-->
+        <li class="list-group-item">Token Price (ETH) <span id="tokenPrice"/></li>
+        <li class="list-group-item">Amount <label><input type="number" v-model.number="amount"></label>
         <li class="list-group-item" style="text-align: center">
             <button class="btn btn-primary btn-outline" v-on:click="buy">Buy</button>
         </li>
@@ -70,32 +69,13 @@
 
 <script>
 
-    // let web3 = new Web3(new Web3.providers.HttpProvider("https://api.myetherapi.com/eth"));
+    let web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
     // web3.eth.defaultAccount = "0x8d12A197cB00D4747a1fe03395095ce2A5CC6819";
     // console.log(web3.eth.defaultAccount);
 
     const config = {
-        contractAddress: '0xab02bf70b941ffb3f0d4da50171ac15efc8316e8',
+        contractAddress: '0x81a18307bfec09c9eb1f841530ae0aa7a0acd6b2',
         contractAbi: [
-            {
-                "constant": true,
-                "inputs": [
-                    {
-                        "name": "",
-                        "type": "address"
-                    }
-                ],
-                "name": "purchasers",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "uint256"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
             {
                 "constant": true,
                 "inputs": [],
@@ -142,6 +122,25 @@
                 "constant": true,
                 "inputs": [],
                 "name": "getTokenPrice",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [
+                    {
+                        "name": "_address",
+                        "type": "address"
+                    }
+                ],
+                "name": "getNumberOfTokens",
                 "outputs": [
                     {
                         "name": "",
@@ -212,8 +211,6 @@
         return contract
     });
 
-    console.log(contract);
-
     let wallet = new Vue({
 
         el: '#wallet',
@@ -228,7 +225,7 @@
         mounted() {
             this.getAddress();
             this.getEtherBalance();
-            // this.getTokenBalance();
+            this.getNumberOfTokens();
         },
 
         methods: {
@@ -245,10 +242,10 @@
                 })
             },
 
-            getTokenBalance() {
-                contract.balanceOf(this.address, (error, tokens) => {
+            getNumberOfTokens() {
+                contract.getNumberOfTokens(this.address, (error, tokens) => {
                     if (!error) {
-                        this.tokens = web3.fromWei(tokens, 'ether').toNumber();
+                        this.tokens = tokens.toNumber();
                     } else
                         console.log(error);
                 })
@@ -265,19 +262,19 @@
         },
 
         mounted() {
-            this.getContractOwnerAddress();
+            // this.getContractOwnerAddress();
             this.getTokenPrice();
         },
 
         methods: {
-            getContractOwnerAddress() {
-                contract.getContractOwner(function (error, contractOwner) {
-                    if (!error) {
-                        document.getElementById("contractOwnerAddress").innerHTML = contractOwner;
-                    } else
-                        console.log(error);
-                });
-            },
+            // getContractOwnerAddress() {
+            //     contract.getContractOwner(function (error, contractOwner) {
+            //         if (!error) {
+            //             document.getElementById("contractOwnerAddress").innerHTML = contractOwner;
+            //         } else
+            //             console.log(error);
+            //     });
+            // },
 
             getTokenPrice() {
                 contract.getTokenPrice(function (error, tokenPrice) {
@@ -309,12 +306,14 @@
 
                 web3.eth.sendTransaction({
                     from: wallet.address,
-                    to: contract.address,
+                    to: config.contractAddress,
                     value: sum,
                     gasLimit: 21000,
                     gasPrice: 20000000000
                 });
+
                 wallet.getEtherBalance();
+                wallet.getNumberOfTokens();
             }
         },
     });
