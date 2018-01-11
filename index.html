@@ -74,22 +74,8 @@
     // console.log(web3.eth.defaultAccount);
 
     const config = {
-        contractAddress: '0x81a18307bfec09c9eb1f841530ae0aa7a0acd6b2',
+        contractAddress: '0xef820f3daf255c1a461884587883f2962ab06ad8',
         contractAbi: [
-            {
-                "constant": true,
-                "inputs": [],
-                "name": "numberOfSoldTokens",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "uint256"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
             {
                 "constant": true,
                 "inputs": [],
@@ -107,21 +93,7 @@
             {
                 "constant": true,
                 "inputs": [],
-                "name": "numberOfAllTokens",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "uint256"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "constant": true,
-                "inputs": [],
-                "name": "getTokenPrice",
+                "name": "getNumberOfAllTokens",
                 "outputs": [
                     {
                         "name": "",
@@ -154,6 +126,34 @@
             {
                 "constant": true,
                 "inputs": [],
+                "name": "getTokenPrice",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "numberOfAllTokens",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
                 "name": "getContractOwner",
                 "outputs": [
                     {
@@ -166,18 +166,24 @@
                 "type": "function"
             },
             {
-                "constant": false,
-                "inputs": [
+                "constant": true,
+                "inputs": [],
+                "name": "numberOfSoldTokens",
+                "outputs": [
                     {
-                        "name": "value",
+                        "name": "",
                         "type": "uint256"
                     }
                 ],
-                "name": "setNumberOfAllTokens",
-                "outputs": [],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
                 "payable": false,
                 "stateMutability": "nonpayable",
-                "type": "function"
+                "type": "constructor"
             },
             {
                 "constant": false,
@@ -194,10 +200,18 @@
                 "type": "function"
             },
             {
-                "inputs": [],
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "value",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "setNumberOfAllTokens",
+                "outputs": [],
                 "payable": false,
                 "stateMutability": "nonpayable",
-                "type": "constructor"
+                "type": "function"
             },
             {
                 "payable": true,
@@ -219,13 +233,15 @@
             address: "",
             etherBalance: 0,
             bitCoinBalance: 0,
-            tokens: 0
+            tokens: 0,
+            allTokens: 0
         },
 
         mounted() {
             this.getAddress();
             this.getEtherBalance();
             this.getNumberOfTokens();
+            this.getNumberOfAllTokens();
         },
 
         methods: {
@@ -246,6 +262,15 @@
                 contract.getNumberOfTokens(this.address, (error, tokens) => {
                     if (!error) {
                         this.tokens = tokens.toNumber();
+                    } else
+                        console.log(error);
+                })
+            },
+
+            getNumberOfAllTokens() {
+                contract.getNumberOfAllTokens((error, allTokens) => {
+                    if (!error) {
+                        this.allTokens = allTokens.toNumber();
                     } else
                         console.log(error);
                 })
@@ -306,7 +331,7 @@
 
                 web3.eth.sendTransaction({
                     from: wallet.address,
-                    to: config.contractAddress,
+                    to: contract.address,
                     value: sum,
                     gasLimit: 21000,
                     gasPrice: 20000000000
@@ -314,6 +339,8 @@
 
                 wallet.getEtherBalance();
                 wallet.getNumberOfTokens();
+                wallet.getNumberOfAllTokens();
+                getBitCoinInfo();
             }
         },
     });
@@ -359,42 +386,57 @@
     //     }
     // });
 
-    let jsonObject = {};
-    let payments = {};
-    let current = {};
-    let getBitCoinInfo = "php/getBitCoinInfo.php";
+    getBitCoinInfo();
 
-    let xmlHttpRequest = new XMLHttpRequest();
-    xmlHttpRequest.open("POST", getBitCoinInfo, true);
-    xmlHttpRequest.onreadystatechange = function () {
-        if (xmlHttpRequest.readyState === 4) {
-            if (xmlHttpRequest.status === 200) {
-                jsonObject = JSON.parse(xmlHttpRequest.responseText);
+    function getBitCoinInfo() {
+        let jsonObject = {};
+        let payments = {};
+        let current = {};
+        let getBitCoinInfo = "php/getBitCoinInfo.php";
 
-                payments = jsonObject.result.payments;
-                current = jsonObject.result.current;
+        let xmlHttpRequest = new XMLHttpRequest();
+        xmlHttpRequest.open("POST", getBitCoinInfo, true);
+        xmlHttpRequest.onreadystatechange = function () {
+            if (xmlHttpRequest.readyState === 4) {
+                if (xmlHttpRequest.status === 200) {
+                    jsonObject = JSON.parse(xmlHttpRequest.responseText);
 
-                let table = document.getElementById("bitCoinTransactionsTable");
+                    payments = jsonObject.result.payments;
+                    current = jsonObject.result.current;
 
-                for (let i = 0; i < payments.length; i++) {
-                    let row = table.insertRow(0);
-                    let cell0 = row.insertCell(0);
-                    let cell1 = row.insertCell(1);
-                    let cell2 = row.insertCell(2);
-                    let cell3 = row.insertCell(3);
-                    cell0.innerHTML = new Date(payments[i].time * 1000);
-                    cell1.innerHTML = payments[i].TXID;
-                    cell2.innerHTML = payments[i].amount / 12;
-                    cell3.innerHTML = payments[i].fee / 12;
-                }
+                    let table = document.getElementById("bitCoinTransactionsTable");
 
-                for (let i = 0; i < current.length; i++) {
-                    wallet.bitCoinBalance += Number(current[i].data[1]);
+                    if (payments && current) {
+
+                        for (let i = 0; i < table.rows.length; i++) {
+                            table.deleteRow(i);
+                        }
+
+                        for (let i = 0; i < payments.length; i++) {
+                            let row = table.insertRow(0);
+                            let cell0 = row.insertCell(0);
+                            let cell1 = row.insertCell(1);
+                            let cell2 = row.insertCell(2);
+                            let cell3 = row.insertCell(3);
+                            cell0.innerHTML = new Date(payments[i].time * 1000);
+                            cell1.innerHTML = payments[i].TXID;
+                            cell2.innerHTML = (payments[i].amount / wallet.allTokens) * wallet.tokens;
+                            cell3.innerHTML = (payments[i].fee / wallet.allTokens) * wallet.tokens;
+                        }
+
+                        wallet.bitCoinBalance = 0;
+                        for (let i = 0; i < current.length; i++) {
+                            wallet.bitCoinBalance += (Number(current[i].data[1]) / wallet.allTokens) * wallet.tokens;
+                        }
+                    } else alert("Failed to load resource, request must wait every 30 seconds until stats are refreshed");
                 }
             }
-        }
-    };
-    xmlHttpRequest.send(null);
+        };
+        xmlHttpRequest.onerror = function () {
+            alert("Failed to load resource, request must wait every 30 seconds until stats are refreshed");
+        };
+        xmlHttpRequest.send(null);
+    }
 
 </script>
 

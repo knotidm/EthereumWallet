@@ -18,13 +18,10 @@ contract GreatContract {
 
     function() public payable {
         uint256 amount = msg.value / tokenPrice;
-        if (amount > numberOfAvailableTokens) {
-            throw;
-        } else {
-            purchasers[msg.sender] += amount;
-            numberOfSoldTokens += amount;
-            numberOfAvailableTokens -= amount;
-        }
+        require(amount <= numberOfAvailableTokens);
+        purchasers[msg.sender] += amount;
+        numberOfSoldTokens += amount;
+        numberOfAvailableTokens -= amount;
     }
 
     modifier OnlyContractOwner{
@@ -32,7 +29,11 @@ contract GreatContract {
         _;
     }
 
-    function getNumberOfTokens(address _address) constant returns (uint256) {
+    function getNumberOfAllTokens() public constant returns (uint256) {
+        return numberOfAllTokens;
+    }
+
+    function getNumberOfTokens(address _address) public constant returns (uint256) {
         return purchasers[_address];
     }
 
