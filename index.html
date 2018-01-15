@@ -18,7 +18,7 @@
 
 <body style="background-image: url(images/hero_bg.jpg)">
 
-<div id="wallet" class="col-lg-5">
+<div id="wallet" class="col-md-5">
     <p class="page-header" style="color:wheat;">Wallet</p>
     <ul class="list-group">
         <li class="list-group-item">Address {{ address }}</li>
@@ -28,19 +28,18 @@
     </ul>
 </div>
 
-<div id="buyTokens" class="col-lg-5">
+<div id="buyTokens" class="col-md-5">
     <p class="page-header" style="color:wheat;">Buy Tokens</p>
     <ul class="list-group">
-        <!--<li class="list-group-item">Contract Owner Address <span id="contractOwnerAddress"/></li>-->
         <li class="list-group-item">Token Price (ETH) <span id="tokenPrice"/></li>
-        <li class="list-group-item">Amount <label><input type="number" v-model.number="amount"></label>
+        <li class="list-group-item">Amount <label><input class="input-lg" type="number" v-model.number="amount"></label>
         <li class="list-group-item" style="text-align: center">
             <button class="btn btn-primary btn-outline" v-on:click="buy">Buy</button>
         </li>
     </ul>
 </div>
 
-<!--<div id="etherTransactions" class="col-lg-5">-->
+<!--<div id="etherTransactions" class="col-md-5">-->
 <!--<p class="page-header" style="color:wheat;">Ether Transactions</p>-->
 <!--<table :headers="headers" :items="items">-->
 <!--<template slot="items" slot-scope="props">-->
@@ -51,7 +50,7 @@
 <!--</table>-->
 <!--</div>-->
 
-<div class="col-lg-5">
+<div class="col-md-5">
     <p class="page-header" style="color:wheat;">Bitcoin Transactions</p>
     <table class="table">
         <thead>
@@ -67,14 +66,25 @@
     </table>
 </div>
 
+<div id="ownerPanel" class="col-md-5" v-if="show">
+    <p class="page-header" style="color:wheat;">Owner Panel</p>
+    <ul class="list-group">
+        <li class="list-group-item">Number Of All Tokens {{ allTokens }}</li>
+        <li class="list-group-item">Set Number of all Tokens <label><input class="input-lg" type="number"
+                                                                           v-model.number="numberOfAllTokens"></label>
+        <li class="list-group-item" style="text-align: center">
+            <button class="btn btn-primary btn-outline" v-on:click="setAllTokens">Set</button>
+        </li>
+    </ul>
+</div>
+
 <script>
 
     let web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-    // web3.eth.defaultAccount = "0x8d12A197cB00D4747a1fe03395095ce2A5CC6819";
-    // console.log(web3.eth.defaultAccount);
+    web3.eth.defaultAccount = web3.eth.accounts[0];
 
     const config = {
-        contractAddress: '0xef820f3daf255c1a461884587883f2962ab06ad8',
+        contractAddress: '0x66a14399674254852acdb7ab72ae5f3fedde0b25',
         contractAbi: [
             {
                 "constant": true,
@@ -233,20 +243,18 @@
             address: "",
             etherBalance: 0,
             bitCoinBalance: 0,
-            tokens: 0,
-            allTokens: 0
+            tokens: 0
         },
 
         mounted() {
             this.getAddress();
             this.getEtherBalance();
             this.getNumberOfTokens();
-            this.getNumberOfAllTokens();
         },
 
         methods: {
             getAddress() {
-                this.address = contract._eth.coinbase;
+                this.address = web3.eth.defaultAccount;
             },
 
             getEtherBalance() {
@@ -267,14 +275,7 @@
                 })
             },
 
-            getNumberOfAllTokens() {
-                contract.getNumberOfAllTokens((error, allTokens) => {
-                    if (!error) {
-                        this.allTokens = allTokens.toNumber();
-                    } else
-                        console.log(error);
-                })
-            }
+
         }
     });
 
@@ -287,19 +288,10 @@
         },
 
         mounted() {
-            // this.getContractOwnerAddress();
             this.getTokenPrice();
         },
 
         methods: {
-            // getContractOwnerAddress() {
-            //     contract.getContractOwner(function (error, contractOwner) {
-            //         if (!error) {
-            //             document.getElementById("contractOwnerAddress").innerHTML = contractOwner;
-            //         } else
-            //             console.log(error);
-            //     });
-            // },
 
             getTokenPrice() {
                 contract.getTokenPrice(function (error, tokenPrice) {
@@ -339,10 +331,10 @@
 
                 wallet.getEtherBalance();
                 wallet.getNumberOfTokens();
-                wallet.getNumberOfAllTokens();
+                ownerPanel.getNumberOfAllTokens();
                 getBitCoinInfo();
             }
-        },
+        }
     });
 
     // let etherTransactions = new Vue({
@@ -420,13 +412,13 @@
                             let cell3 = row.insertCell(3);
                             cell0.innerHTML = new Date(payments[i].time * 1000);
                             cell1.innerHTML = payments[i].TXID;
-                            cell2.innerHTML = (payments[i].amount / wallet.allTokens) * wallet.tokens;
-                            cell3.innerHTML = (payments[i].fee / wallet.allTokens) * wallet.tokens;
+                            cell2.innerHTML = (payments[i].amount / ownerPanel.allTokens) * wallet.tokens;
+                            cell3.innerHTML = (payments[i].fee / ownerPanel.allTokens) * wallet.tokens;
                         }
 
                         wallet.bitCoinBalance = 0;
                         for (let i = 0; i < current.length; i++) {
-                            wallet.bitCoinBalance += (Number(current[i].data[1]) / wallet.allTokens) * wallet.tokens;
+                            wallet.bitCoinBalance += (Number(current[i].data[1]) / ownerPanel.allTokens) * wallet.tokens;
                         }
                     } else alert("Failed to load resource, request must wait every 30 seconds until stats are refreshed");
                 }
@@ -437,6 +429,57 @@
         };
         xmlHttpRequest.send(null);
     }
+
+    let ownerPanel = new Vue({
+
+        el: '#ownerPanel',
+
+        data: {
+            show: true,
+            allTokens: 0,
+            numberOfAllTokens: 0
+        },
+
+        mounted() {
+            this.getContractOwnerAddress();
+            this.getNumberOfAllTokens();
+        },
+
+        methods: {
+            getContractOwnerAddress() {
+                contract.getContractOwner(function (error, contractOwner) {
+                    if (!error) {
+                        if (wallet.address === contractOwner) {
+                            ownerPanel.show = true;
+                        } else if (wallet.address !== contractOwner) {
+                            ownerPanel.show = false;
+                        }
+                    } else
+                        console.log(error);
+                });
+            },
+
+            getNumberOfAllTokens() {
+                contract.getNumberOfAllTokens((error, allTokens) => {
+                    if (!error) {
+                        this.allTokens = allTokens.toNumber();
+                    } else
+                        console.log(error);
+                })
+            },
+
+            setAllTokens: function (event) {
+                contract.setNumberOfAllTokens(this.numberOfAllTokens, (error, result) => {
+                    if (!error) {
+                        console.log(result);
+                    } else
+                        console.log(error);
+                });
+
+                this.getNumberOfAllTokens();
+            }
+        },
+    });
 
 </script>
 
