@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml">
 
 <head>
@@ -84,26 +84,12 @@
     web3.eth.defaultAccount = web3.eth.accounts[0];
 
     const config = {
-        contractAddress: '0x66a14399674254852acdb7ab72ae5f3fedde0b25',
+        contractAddress: '0xbc7bcf515b5841fb881518beb9eb76da2b04cf50',
         contractAbi: [
             {
                 "constant": true,
                 "inputs": [],
-                "name": "numberOfAvailableTokens",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "uint256"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "constant": true,
-                "inputs": [],
-                "name": "getNumberOfAllTokens",
+                "name": "getTokenPrice",
                 "outputs": [
                     {
                         "name": "",
@@ -136,21 +122,7 @@
             {
                 "constant": true,
                 "inputs": [],
-                "name": "getTokenPrice",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "uint256"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "constant": true,
-                "inputs": [],
-                "name": "numberOfAllTokens",
+                "name": "getNumberOfAllTokens",
                 "outputs": [
                     {
                         "name": "",
@@ -176,24 +148,18 @@
                 "type": "function"
             },
             {
-                "constant": true,
-                "inputs": [],
-                "name": "numberOfSoldTokens",
-                "outputs": [
+                "constant": false,
+                "inputs": [
                     {
-                        "name": "",
+                        "name": "value",
                         "type": "uint256"
                     }
                 ],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [],
+                "name": "setNumberOfAllTokens",
+                "outputs": [],
                 "payable": false,
                 "stateMutability": "nonpayable",
-                "type": "constructor"
+                "type": "function"
             },
             {
                 "constant": false,
@@ -210,18 +176,10 @@
                 "type": "function"
             },
             {
-                "constant": false,
-                "inputs": [
-                    {
-                        "name": "value",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "setNumberOfAllTokens",
-                "outputs": [],
+                "inputs": [],
                 "payable": false,
                 "stateMutability": "nonpayable",
-                "type": "function"
+                "type": "constructor"
             },
             {
                 "payable": true,
@@ -333,6 +291,8 @@
                 wallet.getNumberOfTokens();
                 ownerPanel.getNumberOfAllTokens();
                 getBitCoinInfo();
+                this.amount = null;
+
             }
         }
     });

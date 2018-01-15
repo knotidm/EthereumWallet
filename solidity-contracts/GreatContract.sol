@@ -2,10 +2,10 @@ pragma solidity ^0.4.18;
 
 contract GreatContract {
     address private contractOwner;
-    uint256 tokenPrice;
-    uint256 public numberOfAllTokens;
-    uint256 public numberOfAvailableTokens;
-    uint256 public numberOfSoldTokens;
+    uint256 private tokenPrice;
+    uint256 private numberOfAllTokens;
+    uint256 private numberOfAvailableTokens;
+    uint256 private numberOfSoldTokens;
     mapping(address => uint256) private purchasers;
 
     function GreatContract() public {
@@ -16,40 +16,40 @@ contract GreatContract {
         numberOfSoldTokens = 0;
     }
 
-    function() public payable {
+    function() external payable {
         uint256 amount = msg.value / tokenPrice;
-        require(amount <= numberOfAvailableTokens);
+        require(msg.value % tokenPrice == 0 && amount <= numberOfAvailableTokens);
         purchasers[msg.sender] += amount;
         numberOfSoldTokens += amount;
         numberOfAvailableTokens -= amount;
     }
 
-    modifier OnlyContractOwner{
+    modifier OnlyContractOwner {
         require(msg.sender == contractOwner);
         _;
     }
 
-    function getNumberOfAllTokens() public constant returns (uint256) {
+    function getNumberOfAllTokens() external constant returns (uint256) {
         return numberOfAllTokens;
     }
 
-    function getNumberOfTokens(address _address) public constant returns (uint256) {
+    function getNumberOfTokens(address _address) external constant returns (uint256) {
         return purchasers[_address];
     }
 
-    function getContractOwner() public constant returns (address) {
+    function getContractOwner() external constant returns (address) {
         return (contractOwner);
     }
 
-    function getTokenPrice() public constant returns (uint256) {
+    function getTokenPrice() external constant returns (uint256) {
         return (tokenPrice);
     }
 
-    function setTokenPrice(uint256 value) public OnlyContractOwner {
+    function setTokenPrice(uint256 value) external OnlyContractOwner {
         tokenPrice = value;
     }
 
-    function setNumberOfAllTokens(uint256 value) public OnlyContractOwner {
+    function setNumberOfAllTokens(uint256 value) external OnlyContractOwner {
         numberOfAllTokens = value;
         numberOfAvailableTokens = numberOfAllTokens - numberOfSoldTokens;
     }
