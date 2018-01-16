@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml">
 
 <head>
     <title>Func Token Wallet</title>
@@ -18,73 +18,84 @@
 
 <body style="background-image: url(images/hero_bg.jpg)">
 
-<div id="wallet" class="col-md-5">
-    <p class="page-header" style="color:wheat;">Wallet</p>
-    <ul class="list-group">
-        <li class="list-group-item">Address {{ address }}</li>
-        <li class="list-group-item">Ether Balance {{ etherBalance }}</li>
-        <li class="list-group-item">BitCoin Balance {{ bitCoinBalance }}</li>
-        <li class="list-group-item">Number Of Tokens {{ tokens }}</li>
-    </ul>
+<div class="row" style="padding-left: 25px">
+    <div id="wallet" class="col-md-5">
+        <p class="page-header" style="color:wheat;">Wallet</p>
+        <ul class="list-group">
+            <li class="list-group-item">Address {{ address }}</li>
+            <li class="list-group-item">Ether Balance {{ etherBalance }}</li>
+            <li class="list-group-item">BitCoin Balance {{ bitCoinBalance }}</li>
+            <li class="list-group-item">Number Of Tokens {{ tokens }}</li>
+        </ul>
+    </div>
+
+    <div id="tokens" class="col-md-5">
+        <p class="page-header" style="color:wheat;">Buy Tokens</p>
+        <ul class="list-group">
+            <li class="list-group-item">Token Price (ETH) <span id="tokenPrice"/></li>
+            <li class="list-group-item">Amount <label><input class="input-lg" type="number"
+                                                             v-model.number="amount"></label>
+                <button class="btn btn-primary btn-outline" v-on:click="buyTokens">Buy</button>
+            </li>
+        </ul>
+    </div>
 </div>
 
-<div id="buyTokens" class="col-md-5">
-    <p class="page-header" style="color:wheat;">Buy Tokens</p>
-    <ul class="list-group">
-        <li class="list-group-item">Token Price (ETH) <span id="tokenPrice"/></li>
-        <li class="list-group-item">Amount <label><input class="input-lg" type="number" v-model.number="amount"></label>
-        <li class="list-group-item" style="text-align: center">
-            <button class="btn btn-primary btn-outline" v-on:click="buy">Buy</button>
-        </li>
-    </ul>
+<div class="row" style="padding-left: 25px">
+    <div id="ownerPanel" class="col-md-5" v-if="show">
+        <p class="page-header" style="color:wheat;">Owner Panel <button class="btn btn-primary btn-outline" v-on:click="refresh">Refresh</button> </p>
+        <ul class="list-group">
+            <li class="list-group-item">Number Of All Tokens {{ numberOfAllTokens }}</li>
+            <li class="list-group-item">Number Of Available Tokens {{ numberOfAvailableTokens }}</li>
+            <li class="list-group-item">Number Of Send Tokens {{ numberOfSoldTokens }}</li>
+            <li class="list-group-item">Set Token Price <label><input class="input-lg" type="number" step="0.0001"
+                                                                      v-model.number="price"></label>
+                <button class="btn btn-primary btn-outline" v-on:click="setTokenPrice">Set</button>
+            <li class="list-group-item">Set Number Of All Tokens <label><input class="input-lg" type="number"
+                                                                               v-model.number="amount"></label>
+                <button class="btn btn-primary btn-outline" v-on:click="setAllTokens">Set</button>
+            </li>
+        </ul>
+    </div>
 </div>
 
-<!--<div id="etherTransactions" class="col-md-5">-->
-<!--<p class="page-header" style="color:wheat;">Ether Transactions</p>-->
-<!--<table :headers="headers" :items="items">-->
-<!--<template slot="items" slot-scope="props">-->
-<!--<td>{{ props.item.to }}</td>-->
-<!--<td>{{ props.item.from }}</td>-->
-<!--<td>{{ props.item.amount }}</td>-->
-<!--</template>-->
-<!--</table>-->
-<!--</div>-->
+<div class="row" style="padding-left: 25px">
 
-<div class="col-md-5">
-    <p class="page-header" style="color:wheat;">Bitcoin Transactions</p>
-    <table class="table">
-        <thead>
-        <tr class="text-info">
-            <th>Date</th>
-            <th>TXID</th>
-            <th>Payment (BTC)</th>
-            <th>Fee (BTC)</th>
-        </tr>
-        </thead>
-        <tbody id="bitCoinTransactionsTable">
-        </tbody>
-    </table>
-</div>
+    <!--<div id="etherTransactions" class="col-md-5">-->
+    <!--<p class="page-header" style="color:wheat;">Ether Transactions</p>-->
+    <!--<table :headers="headers" :items="items">-->
+    <!--<template slot="items" slot-scope="props">-->
+    <!--<td>{{ props.item.to }}</td>-->
+    <!--<td>{{ props.item.from }}</td>-->
+    <!--<td>{{ props.item.amount }}</td>-->
+    <!--</template>-->
+    <!--</table>-->
+    <!--</div>-->
 
-<div id="ownerPanel" class="col-md-5" v-if="show">
-    <p class="page-header" style="color:wheat;">Owner Panel</p>
-    <ul class="list-group">
-        <li class="list-group-item">Number Of All Tokens {{ allTokens }}</li>
-        <li class="list-group-item">Set Number of all Tokens <label><input class="input-lg" type="number"
-                                                                           v-model.number="numberOfAllTokens"></label>
-        <li class="list-group-item" style="text-align: center">
-            <button class="btn btn-primary btn-outline" v-on:click="setAllTokens">Set</button>
-        </li>
-    </ul>
+    <div class="col-md-5">
+        <p class="page-header" style="color:wheat;">Bitcoin Transactions</p>
+        <table class="table">
+            <thead>
+            <tr class="text-info">
+                <th>Date</th>
+                <th>TXID</th>
+                <th>Payment (BTC)</th>
+                <th>Fee (BTC)</th>
+            </tr>
+            </thead>
+            <tbody id="bitCoinTransactionsTable">
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
 
     let web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-    web3.eth.defaultAccount = web3.eth.accounts[0];
+    web3.eth.defaultAccount = web3.eth.accounts[1];
 
     const config = {
-        contractAddress: '0xbc7bcf515b5841fb881518beb9eb76da2b04cf50',
+        contractAddress: '0x7465db6349de1fbcbe541ce870ab65181c25918b',
         contractAbi: [
             {
                 "constant": true,
@@ -109,6 +120,34 @@
                     }
                 ],
                 "name": "getNumberOfTokens",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "getNumberOfSoldTokens",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "getNumberOfAvailableTokens",
                 "outputs": [
                     {
                         "name": "",
@@ -231,15 +270,13 @@
                     } else
                         console.log(error);
                 })
-            },
-
-
+            }
         }
     });
 
-    let buyTokens = new Vue({
+    let tokens = new Vue({
 
-        el: '#buyTokens',
+        el: '#tokens',
 
         data: {
             amount: null
@@ -260,7 +297,7 @@
                 });
             },
 
-            buy: function (event) {
+            buyTokens: function (event) {
                 if (this.amount <= 0) {
                     alert('Invalid amount!');
                     this.amount = null;
@@ -268,16 +305,6 @@
                 }
 
                 let sum = web3.toWei(this.amount * document.getElementById("tokenPrice").innerHTML, 'ether');
-
-                // contract.buyTokens(this.amount, (error, response) => {
-                //     if (!error) {
-                //         console.log(response);
-                //         this.amount = null;
-                //         return
-                //     }
-                //     console.log(error);
-                //     this.amount = null
-                // });
 
                 web3.eth.sendTransaction({
                     from: wallet.address,
@@ -292,7 +319,115 @@
                 ownerPanel.getNumberOfAllTokens();
                 getBitCoinInfo();
                 this.amount = null;
+            }
+        }
+    });
 
+    let ownerPanel = new Vue({
+
+        el: '#ownerPanel',
+
+        data: {
+            show: true,
+            numberOfAllTokens: 0,
+            numberOfAvailableTokens: 0,
+            numberOfSoldTokens: 0,
+            amount: null,
+            price: null
+        },
+
+        mounted() {
+            this.getContractOwnerAddress();
+            this.getNumberOfAllTokens();
+            this.getNumberOfAvailableTokens();
+            this.getNumberOfSoldTokens();
+        },
+
+        methods: {
+            getContractOwnerAddress() {
+                contract.getContractOwner(function (error, contractOwner) {
+                    if (!error) {
+                        if (wallet.address === contractOwner) {
+                            ownerPanel.show = true;
+                        } else if (wallet.address !== contractOwner) {
+                            ownerPanel.show = false;
+                        }
+                    } else
+                        console.log(error);
+                });
+            },
+
+            getNumberOfAllTokens() {
+                contract.getNumberOfAllTokens((error, allTokens) => {
+                    if (!error) {
+                        this.numberOfAllTokens = allTokens.toNumber();
+                    } else
+                        console.log(error);
+                })
+            },
+
+            getNumberOfAvailableTokens() {
+                contract.getNumberOfAvailableTokens((error, availableTokens) => {
+                    if (!error) {
+                        this.numberOfAvailableTokens = availableTokens.toNumber();
+                    } else
+                        console.log(error);
+                })
+            },
+
+            getNumberOfSoldTokens() {
+                contract.getNumberOfSoldTokens((error, soldTokens) => {
+                    if (!error) {
+                        this.numberOfSoldTokens = soldTokens.toNumber();
+                    } else
+                        console.log(error);
+                })
+            },
+
+            setTokenPrice: function (event) {
+                if (this.price <= 0) {
+                    alert('Invalid amount!');
+                    this.price = null;
+                    return;
+                }
+
+                contract.setTokenPrice(web3.toWei(this.price, 'ether'), (error, result) => {
+                    if (!error) {
+                        console.log(result);
+                    } else
+                        console.log(error);
+                });
+
+                tokens.getTokenPrice();
+                this.price = null;
+            },
+
+            setAllTokens: function (event) {
+                if (this.amount <= 0) {
+                    alert('Invalid amount!');
+                    this.amount = null;
+                    return;
+                }
+
+                contract.setNumberOfAllTokens(this.amount, (error, result) => {
+                    if (!error) {
+                        console.log(result);
+                    } else
+                        console.log(error);
+                });
+
+                this.getNumberOfAllTokens();
+                this.getNumberOfAvailableTokens();
+                this.getNumberOfSoldTokens();
+                this.amount = null;
+            },
+
+            refresh: function (event) {
+                tokens.getTokenPrice();
+                this.getContractOwnerAddress();
+                this.getNumberOfAllTokens();
+                this.getNumberOfAvailableTokens();
+                this.getNumberOfSoldTokens();
             }
         }
     });
@@ -389,57 +524,6 @@
         };
         xmlHttpRequest.send(null);
     }
-
-    let ownerPanel = new Vue({
-
-        el: '#ownerPanel',
-
-        data: {
-            show: true,
-            allTokens: 0,
-            numberOfAllTokens: 0
-        },
-
-        mounted() {
-            this.getContractOwnerAddress();
-            this.getNumberOfAllTokens();
-        },
-
-        methods: {
-            getContractOwnerAddress() {
-                contract.getContractOwner(function (error, contractOwner) {
-                    if (!error) {
-                        if (wallet.address === contractOwner) {
-                            ownerPanel.show = true;
-                        } else if (wallet.address !== contractOwner) {
-                            ownerPanel.show = false;
-                        }
-                    } else
-                        console.log(error);
-                });
-            },
-
-            getNumberOfAllTokens() {
-                contract.getNumberOfAllTokens((error, allTokens) => {
-                    if (!error) {
-                        this.allTokens = allTokens.toNumber();
-                    } else
-                        console.log(error);
-                })
-            },
-
-            setAllTokens: function (event) {
-                contract.setNumberOfAllTokens(this.numberOfAllTokens, (error, result) => {
-                    if (!error) {
-                        console.log(result);
-                    } else
-                        console.log(error);
-                });
-
-                this.getNumberOfAllTokens();
-            }
-        },
-    });
 
 </script>
 

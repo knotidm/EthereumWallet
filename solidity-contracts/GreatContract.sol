@@ -29,16 +29,12 @@ contract GreatContract {
         _;
     }
 
-    function getNumberOfAllTokens() external constant returns (uint256) {
-        return numberOfAllTokens;
+    function getContractOwner() external constant returns (address) {
+        return (contractOwner);
     }
 
     function getNumberOfTokens(address _address) external constant returns (uint256) {
         return purchasers[_address];
-    }
-
-    function getContractOwner() external constant returns (address) {
-        return (contractOwner);
     }
 
     function getTokenPrice() external constant returns (uint256) {
@@ -49,8 +45,21 @@ contract GreatContract {
         tokenPrice = value;
     }
 
+    function getNumberOfAllTokens() external OnlyContractOwner constant returns (uint256) {
+        return numberOfAllTokens;
+    }
+
     function setNumberOfAllTokens(uint256 value) external OnlyContractOwner {
+        require(value >= numberOfSoldTokens);
         numberOfAllTokens = value;
         numberOfAvailableTokens = numberOfAllTokens - numberOfSoldTokens;
+    }
+
+    function getNumberOfAvailableTokens() external OnlyContractOwner constant returns (uint256) {
+        return numberOfAvailableTokens;
+    }
+
+    function getNumberOfSoldTokens() external OnlyContractOwner constant returns (uint256) {
+        return numberOfSoldTokens;
     }
 }
