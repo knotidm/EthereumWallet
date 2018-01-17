@@ -8,9 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet"
           type="text/css">
-    <link rel="icon" type="image/png" href="public/favicon-32x32.png" sizes="32x32">
-    <script src="web3/web3.min.js"></script>
-    <script src="vue/vue.js"></script>
+    <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
+    <script src="js/web3.min.js"></script>
+    <script src="js/vue.js"></script>
 
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/style.css">
@@ -32,7 +32,7 @@
     <div id="tokens" class="col-md-5">
         <p class="page-header" style="color:wheat;">Buy Tokens</p>
         <ul class="list-group">
-            <li class="list-group-item">Token Price (ETH) <span id="tokenPrice"/></li>
+            <li class="list-group-item">Token Price (ETH) <span id="tokenPrice"/> = (USD) <span id="tokenCourse"/></li>
             <li class="list-group-item">Amount <label><input class="input-lg" type="number"
                                                              v-model.number="amount"></label>
                 <button class="btn btn-primary btn-outline" v-on:click="buyTokens">Buy</button>
@@ -43,7 +43,9 @@
 
 <div class="row" style="padding-left: 25px">
     <div id="ownerPanel" class="col-md-5" v-if="show">
-        <p class="page-header" style="color:wheat;">Owner Panel <button class="btn btn-primary btn-outline" v-on:click="refresh">Refresh</button> </p>
+        <p class="page-header" style="color:wheat;">Owner Panel
+            <button class="btn btn-primary btn-outline" v-on:click="refresh">Refresh</button>
+        </p>
         <ul class="list-group">
             <li class="list-group-item">Number Of All Tokens {{ numberOfAllTokens }}</li>
             <li class="list-group-item">Number Of Available Tokens {{ numberOfAvailableTokens }}</li>
@@ -54,6 +56,9 @@
             <li class="list-group-item">Set Number Of All Tokens <label><input class="input-lg" type="number"
                                                                                v-model.number="amount"></label>
                 <button class="btn btn-primary btn-outline" v-on:click="setAllTokens">Set</button>
+            <li class="list-group-item">Set Contract Owner <label><input class="input-lg" type="text"
+                                                                               v-model="contractOwnerAddress"></label>
+                <button class="btn btn-primary btn-outline" v-on:click="setContractOwner">Set</button>
             </li>
         </ul>
     </div>
@@ -92,25 +97,11 @@
 <script>
 
     let web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-    web3.eth.defaultAccount = web3.eth.accounts[1];
+    web3.eth.defaultAccount = web3.eth.accounts[3];
 
     const config = {
-        contractAddress: '0x7465db6349de1fbcbe541ce870ab65181c25918b',
+        contractAddress: '0x0176f93baef77f6092ddf56bfa31fdb6a24fc906',
         contractAbi: [
-            {
-                "constant": true,
-                "inputs": [],
-                "name": "getTokenPrice",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "uint256"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
             {
                 "constant": true,
                 "inputs": [
@@ -133,7 +124,21 @@
             {
                 "constant": true,
                 "inputs": [],
-                "name": "getNumberOfSoldTokens",
+                "name": "getContractOwner",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "getNumberOfAllTokens",
                 "outputs": [
                     {
                         "name": "",
@@ -161,7 +166,7 @@
             {
                 "constant": true,
                 "inputs": [],
-                "name": "getNumberOfAllTokens",
+                "name": "getTokenPrice",
                 "outputs": [
                     {
                         "name": "",
@@ -175,11 +180,11 @@
             {
                 "constant": true,
                 "inputs": [],
-                "name": "getContractOwner",
+                "name": "getNumberOfSoldTokens",
                 "outputs": [
                     {
                         "name": "",
-                        "type": "address"
+                        "type": "uint256"
                     }
                 ],
                 "payable": false,
@@ -190,14 +195,14 @@
                 "constant": false,
                 "inputs": [
                     {
-                        "name": "value",
+                        "name": "sum",
                         "type": "uint256"
                     }
                 ],
-                "name": "setNumberOfAllTokens",
+                "name": "buyTokens",
                 "outputs": [],
-                "payable": false,
-                "stateMutability": "nonpayable",
+                "payable": true,
+                "stateMutability": "payable",
                 "type": "function"
             },
             {
@@ -219,6 +224,34 @@
                 "payable": false,
                 "stateMutability": "nonpayable",
                 "type": "constructor"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "value",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "setNumberOfAllTokens",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "_address",
+                        "type": "address"
+                    }
+                ],
+                "name": "setContractOwner",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
             },
             {
                 "payable": true,
@@ -306,18 +339,25 @@
 
                 let sum = web3.toWei(this.amount * document.getElementById("tokenPrice").innerHTML, 'ether');
 
-                web3.eth.sendTransaction({
-                    from: wallet.address,
-                    to: contract.address,
-                    value: sum,
-                    gasLimit: 21000,
-                    gasPrice: 20000000000
+                contract.buyTokens(sum, function (error, result) {
+                    if (!error) {
+                        console.log(result);
+                    } else
+                        console.log(error);
                 });
+
+                // web3.eth.sendTransaction({
+                //     from: wallet.address,
+                //     to: contract.address,
+                //     value: sum,
+                //     gasLimit: 21000,
+                //     gasPrice: 20000000000
+                // });
 
                 wallet.getEtherBalance();
                 wallet.getNumberOfTokens();
                 ownerPanel.getNumberOfAllTokens();
-                getBitCoinInfo();
+                // getBitCoinInfo();
                 this.amount = null;
             }
         }
@@ -328,12 +368,13 @@
         el: '#ownerPanel',
 
         data: {
-            show: true,
+            show: false,
             numberOfAllTokens: 0,
             numberOfAvailableTokens: 0,
             numberOfSoldTokens: 0,
             amount: null,
-            price: null
+            price: null,
+            contractOwnerAddress: null
         },
 
         mounted() {
@@ -399,6 +440,7 @@
                 });
 
                 tokens.getTokenPrice();
+                getEthereumInfo();
                 this.price = null;
             },
 
@@ -424,10 +466,26 @@
 
             refresh: function (event) {
                 tokens.getTokenPrice();
+                // getEthereumInfo();
                 this.getContractOwnerAddress();
                 this.getNumberOfAllTokens();
                 this.getNumberOfAvailableTokens();
                 this.getNumberOfSoldTokens();
+            },
+
+            setContractOwner: function (event) {
+                if (this.contractOwnerAddress === null) {
+                    alert('Invalid amount!');
+                    this.contractOwnerAddress = null;
+                    return;
+                }
+
+                contract.setContractOwner(this.contractOwnerAddress, (error, result) => {
+                    if (!error) {
+                        console.log(result);
+                    } else
+                        console.log(error);
+                });
             }
         }
     });
@@ -473,57 +531,77 @@
     //     }
     // });
 
-    getBitCoinInfo();
+    // getBitCoinInfo();
 
-    function getBitCoinInfo() {
-        let jsonObject = {};
-        let payments = {};
-        let current = {};
-        let getBitCoinInfo = "php/getBitCoinInfo.php";
+    // function getBitCoinInfo() {
+    //     let jsonObject = {};
+    //     let payments = {};
+    //     let current = {};
+    //
+    //     let xmlHttpRequest = new XMLHttpRequest();
+    //     xmlHttpRequest.open("GET", "php/getBitCoinInfo.php", true);
+    //     xmlHttpRequest.onload = function () {
+    //         if (xmlHttpRequest.readyState === 4) {
+    //             if (xmlHttpRequest.status === 200) {
+    //                 jsonObject = JSON.parse(xmlHttpRequest.responseText);
+    //
+    //                 payments = jsonObject.result.payments;
+    //                 current = jsonObject.result.current;
+    //
+    //                 let table = document.getElementById("bitCoinTransactionsTable");
+    //
+    //                 if (payments && current) {
+    //
+    //                     for (let i = 0; i < table.rows.length; i++) {
+    //                         table.deleteRow(i);
+    //                     }
+    //
+    //                     for (let i = 0; i < payments.length; i++) {
+    //                         let row = table.insertRow(0);
+    //                         let cell0 = row.insertCell(0);
+    //                         let cell1 = row.insertCell(1);
+    //                         let cell2 = row.insertCell(2);
+    //                         let cell3 = row.insertCell(3);
+    //                         cell0.innerHTML = new Date(payments[i].time * 1000);
+    //                         cell1.innerHTML = payments[i].TXID;
+    //                         cell2.innerHTML = (payments[i].amount / ownerPanel.allTokens) * wallet.tokens;
+    //                         cell3.innerHTML = (payments[i].fee / ownerPanel.allTokens) * wallet.tokens;
+    //                     }
+    //
+    //                     wallet.bitCoinBalance = 0;
+    //                     for (let i = 0; i < current.length; i++) {
+    //                         wallet.bitCoinBalance += (Number(current[i].data[1]) / ownerPanel.allTokens) * wallet.tokens;
+    //                     }
+    //                 } else alert("Failed to load resource, request must wait every 30 seconds until stats are refreshed");
+    //             }
+    //         }
+    //     };
+    //     xmlHttpRequest.onerror = function () {
+    //         alert("Failed to load resource, request must wait every 30 seconds until stats are refreshed");
+    //     };
+    //     xmlHttpRequest.send();
+    // }
 
-        let xmlHttpRequest = new XMLHttpRequest();
-        xmlHttpRequest.open("POST", getBitCoinInfo, true);
-        xmlHttpRequest.onreadystatechange = function () {
-            if (xmlHttpRequest.readyState === 4) {
-                if (xmlHttpRequest.status === 200) {
-                    jsonObject = JSON.parse(xmlHttpRequest.responseText);
+    // getEthereumInfo();
 
-                    payments = jsonObject.result.payments;
-                    current = jsonObject.result.current;
-
-                    let table = document.getElementById("bitCoinTransactionsTable");
-
-                    if (payments && current) {
-
-                        for (let i = 0; i < table.rows.length; i++) {
-                            table.deleteRow(i);
-                        }
-
-                        for (let i = 0; i < payments.length; i++) {
-                            let row = table.insertRow(0);
-                            let cell0 = row.insertCell(0);
-                            let cell1 = row.insertCell(1);
-                            let cell2 = row.insertCell(2);
-                            let cell3 = row.insertCell(3);
-                            cell0.innerHTML = new Date(payments[i].time * 1000);
-                            cell1.innerHTML = payments[i].TXID;
-                            cell2.innerHTML = (payments[i].amount / ownerPanel.allTokens) * wallet.tokens;
-                            cell3.innerHTML = (payments[i].fee / ownerPanel.allTokens) * wallet.tokens;
-                        }
-
-                        wallet.bitCoinBalance = 0;
-                        for (let i = 0; i < current.length; i++) {
-                            wallet.bitCoinBalance += (Number(current[i].data[1]) / ownerPanel.allTokens) * wallet.tokens;
-                        }
-                    } else alert("Failed to load resource, request must wait every 30 seconds until stats are refreshed");
-                }
-            }
-        };
-        xmlHttpRequest.onerror = function () {
-            alert("Failed to load resource, request must wait every 30 seconds until stats are refreshed");
-        };
-        xmlHttpRequest.send(null);
-    }
+    // function getEthereumInfo() {
+    //     let jsonObject = {};
+    //
+    //     let xmlHttpRequest = new XMLHttpRequest();
+    //     xmlHttpRequest.open("GET", "php/getEthereumInfo.php", true);
+    //     xmlHttpRequest.onload = function () {
+    //         if (xmlHttpRequest.readyState === 4) {
+    //             if (xmlHttpRequest.status === 200) {
+    //                 jsonObject = JSON.parse(xmlHttpRequest.responseText);
+    //                 console.log(Number(document.getElementById("tokenPrice").innerHTML) * Number(jsonObject[1].price_usd));
+    //                 console.log(document.getElementById("tokenCourse"));
+    //                 // tokenCourse.innerHTML = Number(document.getElementById("tokenPrice").innerHTML) * Number(jsonObject[1].price_usd);
+    //             }
+    //         }
+    //     };
+    //
+    //     xmlHttpRequest.send();
+    // }
 
 </script>
 
