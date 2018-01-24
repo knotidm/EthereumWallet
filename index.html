@@ -86,21 +86,21 @@
         </table>
     </div>
 
-    <div class="col-md-5">
-        <p class="page-header" style="color:wheat;">Bitcoin Transactions</p>
-        <table class="table">
-            <thead>
-            <tr class="text-info">
-                <th>Date</th>
-                <th>TXID</th>
-                <th>Payment (BTC)</th>
-                <th>Fee (BTC)</th>
-            </tr>
-            </thead>
-            <tbody id="bitCoinTransactionsTable">
-            </tbody>
-        </table>
-    </div>
+    <!--<div class="col-md-5">-->
+    <!--<p class="page-header" style="color:wheat;">Bitcoin Transactions</p>-->
+    <!--<table class="table">-->
+    <!--<thead>-->
+    <!--<tr class="text-info">-->
+    <!--<th>Date</th>-->
+    <!--<th>TXID</th>-->
+    <!--<th>Payment (BTC)</th>-->
+    <!--<th>Fee (BTC)</th>-->
+    <!--</tr>-->
+    <!--</thead>-->
+    <!--<tbody id="bitCoinTransactionsTable">-->
+    <!--</tbody>-->
+    <!--</table>-->
+    <!--</div>-->
 </div>
 
 <div class="row" style="padding-left: 25px">
@@ -125,6 +125,19 @@
                 <button class="btn btn-primary btn-outline" v-on:click="destroyContract">Destroy Contract</button>
             </li>
         </ul>
+    </div>
+    <div class="col-md-5">
+        <p class="page-header" style="color:wheat;">Added Tokens</p>
+        <table class="table">
+            <thead>
+            <tr class="text-info">
+                <th>Date</th>
+                <th>Token Amount</th>
+            </tr>
+            </thead>
+            <tbody id="addedTokensTable">
+            </tbody>
+        </table>
     </div>
 </div>
 <div class="row" style="padding-left: 25px">
@@ -363,21 +376,32 @@
             },
 
             signIn() {
-                let xmlHttpRequest = new XMLHttpRequest();
-                xmlHttpRequest.open("GET", "php/setUser.php?firstname="
+                let xmlHttpRequest = XMLHTTPRequestAsync("php/setUser.php?firstname="
                     + this.firstname + "&lastname=" + this.lastname + "&email="
-                    + this.email + "&ethaddress=" + this.address, true);
-                xmlHttpRequest.onload = function () {
-                    if (xmlHttpRequest.readyState === 4) {
-                        if (xmlHttpRequest.status === 200) {
-                            alert(xmlHttpRequest.responseText);
-                        }
-                    }
-                };
-                xmlHttpRequest.send();
+                    + this.email + "&ethaddress=" + this.address);
+
+                let response = XMLHTTPRequestOnLoad(xmlHttpRequest);
+                alert(response);
             }
         }
     });
+
+    function XMLHTTPRequestAsync(url) {
+        let xmlHttpRequest = new XMLHttpRequest();
+        xmlHttpRequest.open("GET", url, true);
+        xmlHttpRequest.send();
+        return xmlHttpRequest;
+    }
+
+    function XMLHTTPRequestOnLoad(xmlHttpRequest) {
+        xmlHttpRequest.onload = function () {
+            if (xmlHttpRequest.readyState === 4) {
+                if (xmlHttpRequest.status === 200) {
+                    return xmlHttpRequest.responseText;
+                }
+            }
+        };
+    }
 
     let wallet = new Vue({
 
@@ -454,13 +478,6 @@
                 let sum = amount * document.getElementById("tokenPrice").innerHTML;
                 let etherSum = web3.toWei(sum, 'ether');
 
-                // contract.buyTokens(sum, function (error, result) {
-                //     if (!error) {
-                //         console.log(result);
-                //     } else
-                //         console.log(error);
-                // });
-
                 web3.eth.sendTransaction({
                     from: wallet.address,
                     to: contract.address,
@@ -469,24 +486,17 @@
                     gasPrice: 20000000000
                 }, function (error, result) {
                     if (!error) {
-                        console.log(result);
-                        let xmlHttpRequest = new XMLHttpRequest();
-                        xmlHttpRequest.open("GET", "php/setEthTransaction.php?date="
+
+                        let xmlHttpRequest = XMLHTTPRequestAsync("php/setEthTransaction.php?date="
                             + new Date() + "&sender=" + wallet.address + "&ethamount="
-                            + sum + "&tokenamount=" + amount, true);
-                        xmlHttpRequest.onload = function () {
-                            if (xmlHttpRequest.readyState === 4) {
-                                if (xmlHttpRequest.status === 200) {
-                                    console.log(xmlHttpRequest.responseText);
-                                }
-                            }
-                        };
-                        xmlHttpRequest.send();
+                            + sum + "&tokenamount=" + amount);
+
+                        let response = XMLHTTPRequestOnLoad(xmlHttpRequest);
+                        console.log(response);
                     }
                     else
                         console.error(error);
                 });
-
 
                 wallet.getEtherBalance();
                 wallet.getNumberOfTokens();
@@ -582,9 +592,17 @@
                     return;
                 }
 
-                contract.setNumberOfAllTokens(this.amount, (error, result) => {
+                let numberOfAllTokensTemp = this.numberOfAllTokens;
+                let amountTemp = this.amount;
+
+                contract.setNumberOfAllTokens(amountTemp, (error, result) => {
                     if (!error) {
-                        console.log(result);
+
+                        let xmlHttpRequest = XMLHTTPRequestAsync("php/addToken.php?date="
+                            + new Date() + "&tokenamount=" + (amountTemp - numberOfAllTokensTemp));
+
+                        let response = XMLHTTPRequestOnLoad(xmlHttpRequest);
+                        console.log(response);
                     } else
                         console.log(error);
                 });
@@ -655,12 +673,12 @@
         ownerPanel.getNumberOfSoldTokens();
     }
 
-    let xmlHttpRequest = new XMLHttpRequest();
-    xmlHttpRequest.open("GET", "php/getUserList.php", true);
+    let xmlHttpRequest = XMLHTTPRequestAsync("php/getUserList.php");
+
     xmlHttpRequest.onload = function () {
         if (xmlHttpRequest.readyState === 4) {
             if (xmlHttpRequest.status === 200) {
-                let userList = xmlHttpRequest.responseText.split("_");
+                let userList = xmlHttpRequest.responseText.split("^");
                 let ethAddressList = [];
 
                 let userTable = document.getElementById("userListTable");
@@ -670,7 +688,7 @@
                 }
 
                 for (let i = 0; i < userList.length - 1; i++) {
-                    let userDataList = userList[i].split(" ");
+                    let userDataList = userList[i].split("_");
                     let row = userTable.insertRow(0);
                     let cell0 = row.insertCell(0);
                     let cell1 = row.insertCell(1);
@@ -702,13 +720,13 @@
             }
         }
     };
-    xmlHttpRequest.send();
 
-    let xmlHttpRequest1 = new XMLHttpRequest();
-    xmlHttpRequest1.open("GET", "php/getEthTransactionList.php", true);
+    let xmlHttpRequest1 = XMLHTTPRequestAsync("php/getEthTransactionList.php");
+
     xmlHttpRequest1.onload = function () {
         if (xmlHttpRequest1.readyState === 4) {
             if (xmlHttpRequest1.status === 200) {
+
                 let ethTransactionList = xmlHttpRequest1.responseText.split("^");
 
                 let ethTransactionListTable = document.getElementById("ethTransactionListTable");
@@ -733,7 +751,7 @@
                     cell2.innerHTML = ethTransactionDataList[2];
                     cell3.innerHTML = ethTransactionDataList[3];
 
-                    if (wallet.address === ethTransactionDataList[1]){
+                    if (wallet.address === ethTransactionDataList[1]) {
                         let row = ethTransactionsTable.insertRow(0);
                         let cell0 = row.insertCell(0);
                         let cell1 = row.insertCell(1);
@@ -746,7 +764,31 @@
             }
         }
     };
-    xmlHttpRequest1.send();
+
+    let xmlHttpRequest2 = XMLHTTPRequestAsync("php/getAddedTokens.php");
+
+    xmlHttpRequest2.onload = function () {
+        if (xmlHttpRequest2.readyState === 4) {
+            if (xmlHttpRequest2.status === 200) {
+
+                let addedTokensList = xmlHttpRequest2.responseText.split("^");
+                let addedTokensTable = document.getElementById("addedTokensTable");
+
+                for (let i = 0; i < addedTokensTable.rows.length; i++) {
+                    addedTokensTable.deleteRow(i);
+                }
+
+                for (let i = 0; i < addedTokensList.length - 1; i++) {
+                    let ethTransactionDataList = addedTokensList[i].split("_");
+                    let row = addedTokensTable.insertRow(0);
+                    let cell0 = row.insertCell(0);
+                    let cell1 = row.insertCell(1);
+                    cell0.innerHTML = ethTransactionDataList[0];
+                    cell1.innerHTML = ethTransactionDataList[1];
+                }
+            }
+        }
+    };
 
     // getBitCoinInfo();
 
@@ -804,21 +846,17 @@
     let tokenCourse = 0;
 
     function getEthereumInfo() {
-        let jsonObject = {};
 
-        let xmlHttpRequest = new XMLHttpRequest();
-        xmlHttpRequest.open("GET", "php/getEthereumInfo.php", true);
+        let xmlHttpRequest = XMLHTTPRequestAsync("php/getEthereumInfo.php");
         xmlHttpRequest.onload = function () {
             if (xmlHttpRequest.readyState === 4) {
                 if (xmlHttpRequest.status === 200) {
-                    jsonObject = JSON.parse(xmlHttpRequest.responseText);
+                    let jsonObject = JSON.parse(xmlHttpRequest.responseText);
                     tokenCourse = Number(jsonObject[1].price_usd);
                     document.getElementById("tokenCourse").innerHTML = Number(document.getElementById("tokenPrice").innerHTML) * tokenCourse;
                 }
             }
         };
-
-        xmlHttpRequest.send();
     }
 
 </script>
