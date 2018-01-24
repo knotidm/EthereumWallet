@@ -18,21 +18,49 @@
 
 <body style="background-image: url(images/hero_bg.jpg)">
 
+<div id="start" class="container" v-if="show" style="padding-left: 25%; padding-top: 15%">
+    <h1>Your MetaMask is locked</h1>
+    <h3>Simply open MetaMask and unlock your account</h3>
+    <h3>If You don't know what is MetaMask <a target="_blank" href="https://youtu.be/tfETpi-9ORs">click here</a></h3>
+</div>
+
+<div id="signin" class="container" v-if="show" style="padding-left: 35%; padding-top: 10%">
+    <h4>
+        <label>Wallet Address</label>
+        <br>
+        <input class="input-lg" type="text" maxlength="100" readonly="" v-model="address"></h4>
+    <h4>
+        <label>First Name</label>
+        <br>
+        <input class="input-lg" type="text" placeholder="Felix" maxlength="40" v-model="firstname"></h4>
+    <h4>
+        <label>Last Name</label>
+        <br>
+        <input class="input-lg" type="text" placeholder="Lee" maxlength="40" v-model="lastname"></h4>
+    <h4>
+        <label>Email Address</label>
+        <br>
+        <input class="input-lg" type="email" placeholder="example@gmail.com" maxlength="100" v-model="email"></h4>
+    <button class="btn btn-primary btn-outline" v-on:click="signIn">Sign In</button>
+</div>
+
 <div class="row" style="padding-left: 25px">
-    <div id="wallet" class="col-md-5">
+    <div id="wallet" class="col-md-5" v-if="show">
         <p class="page-header" style="color:wheat;">Wallet</p>
         <ul class="list-group">
-            <li class="list-group-item">Address {{ address }}</li>
-            <li class="list-group-item">Ether Balance {{ etherBalance }}</li>
-            <li class="list-group-item">BitCoin Balance {{ bitCoinBalance }}</li>
-            <li class="list-group-item">Number Of Tokens {{ tokens }}</li>
+            <li class="list-group-item">Address {{ address }}
+            <li class="list-group-item">Ether Balance {{ etherBalance }}
+            <li class="list-group-item">BitCoin Balance {{ bitCoinBalance }}
+            <li class="list-group-item">Number Of Tokens {{ tokens }}
+            </li>
         </ul>
     </div>
 
-    <div id="tokens" class="col-md-5">
+    <div id="tokens" class="col-md-5" v-if="show">
         <p class="page-header" style="color:wheat;">Buy Tokens</p>
         <ul class="list-group">
-            <li class="list-group-item">Token Price (ETH) <span id="tokenPrice"/> = (USD) <span id="tokenCourse"/></li>
+            <li class="list-group-item">Token Price (ETH) <span id="tokenPrice"/>
+            <li class="list-group-item">Token Price (USD) <span id="tokenCourse"/>
             <li class="list-group-item">Amount <label><input class="input-lg" type="number"
                                                              v-model.number="amount"></label>
                 <button class="btn btn-primary btn-outline" v-on:click="buyTokens">Buy</button>
@@ -42,40 +70,21 @@
 </div>
 
 <div class="row" style="padding-left: 25px">
-    <div id="ownerPanel" class="col-md-5" v-if="show">
-        <p class="page-header" style="color:wheat;">Owner Panel
-            <button class="btn btn-primary btn-outline" v-on:click="refresh">Refresh</button>
-        </p>
-        <ul class="list-group">
-            <li class="list-group-item">Number Of All Tokens {{ numberOfAllTokens }}</li>
-            <li class="list-group-item">Number Of Available Tokens {{ numberOfAvailableTokens }}</li>
-            <li class="list-group-item">Number Of Send Tokens {{ numberOfSoldTokens }}</li>
-            <li class="list-group-item">Set Token Price <label><input class="input-lg" type="number" step="0.0001"
-                                                                      v-model.number="price"></label>
-                <button class="btn btn-primary btn-outline" v-on:click="setTokenPrice">Set</button>
-            <li class="list-group-item">Set Number Of All Tokens <label><input class="input-lg" type="number"
-                                                                               v-model.number="amount"></label>
-                <button class="btn btn-primary btn-outline" v-on:click="setAllTokens">Set</button>
-            <li class="list-group-item">Set Contract Owner <label><input class="input-lg" type="text"
-                                                                               v-model="contractOwnerAddress"></label>
-                <button class="btn btn-primary btn-outline" v-on:click="setContractOwner">Set</button>
-            </li>
-        </ul>
+
+    <div class="col-md-5">
+        <p class="page-header" style="color:wheat;">ETH Transactions</p>
+        <table class="table">
+            <thead>
+            <tr class="text-info">
+                <th>Date</th>
+                <th>Eth Amount</th>
+                <th>Token Amount</th>
+            </tr>
+            </thead>
+            <tbody id="ethTransactionsTable">
+            </tbody>
+        </table>
     </div>
-</div>
-
-<div class="row" style="padding-left: 25px">
-
-    <!--<div id="etherTransactions" class="col-md-5">-->
-    <!--<p class="page-header" style="color:wheat;">Ether Transactions</p>-->
-    <!--<table :headers="headers" :items="items">-->
-    <!--<template slot="items" slot-scope="props">-->
-    <!--<td>{{ props.item.to }}</td>-->
-    <!--<td>{{ props.item.from }}</td>-->
-    <!--<td>{{ props.item.amount }}</td>-->
-    <!--</template>-->
-    <!--</table>-->
-    <!--</div>-->
 
     <div class="col-md-5">
         <p class="page-header" style="color:wheat;">Bitcoin Transactions</p>
@@ -94,14 +103,92 @@
     </div>
 </div>
 
+<div class="row" style="padding-left: 25px">
+    <div id="ownerPanel" class="col-md-6" v-if="show">
+        <p class="page-header" style="color:wheat;">Owner Panel
+            <button class="btn btn-primary btn-outline" v-on:click="refresh">Refresh</button>
+        </p>
+        <ul class="list-group">
+            <li class="list-group-item">Number Of All Tokens {{ numberOfAllTokens }}
+            <li class="list-group-item">Number Of Available Tokens {{ numberOfAvailableTokens }}
+            <li class="list-group-item">Number Of Send Tokens {{ numberOfSoldTokens }}
+            <li class="list-group-item">Set Token Price (USD) <label><input class="input-lg" type="number" step="0.01"
+                                                                            v-model.number="price"></label>
+                <button class="btn btn-primary btn-outline" v-on:click="setTokenPrice">Set</button>
+            <li class="list-group-item">Set Number Of All Tokens <label><input class="input-lg" type="number"
+                                                                               v-model.number="amount"></label>
+                <button class="btn btn-primary btn-outline" v-on:click="setAllTokens">Set</button>
+            <li class="list-group-item">Set Contract Owner <label><input class="input-lg" type="text"
+                                                                         v-model="contractOwnerAddress"></label>
+                <button class="btn btn-primary btn-outline" v-on:click="setContractOwner">Set</button>
+            <li class="list-group-item">
+                <button class="btn btn-primary btn-outline" v-on:click="destroyContract">Destroy Contract</button>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="row" style="padding-left: 25px">
+    <div class="row" style="padding-left: 25px">
+        <div class="col-md-10">
+            <p class="page-header" style="color:wheat;">User List</p>
+            <table class="table">
+                <thead>
+                <tr class="text-info">
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Eth Address</th>
+                    <th>Tokens</th>
+                </tr>
+                </thead>
+                <tbody id="userListTable">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="row" style="padding-left: 25px">
+    <div class="row" style="padding-left: 25px">
+        <div class="col-md-10">
+            <p class="page-header" style="color:wheat;">ETH Transaction List</p>
+            <table class="table">
+                <thead>
+                <tr class="text-info">
+                    <th>Date</th>
+                    <th>Sender</th>
+                    <th>Eth Amount</th>
+                    <th>Token Amount</th>
+                </tr>
+                </thead>
+                <tbody id="ethTransactionListTable">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <script>
 
-    let web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-    web3.eth.defaultAccount = web3.eth.accounts[3];
+    // let web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+    // web3.eth.defaultAccount = web3.eth.accounts[1];
 
     const config = {
-        contractAddress: '0x0176f93baef77f6092ddf56bfa31fdb6a24fc906',
+        contractAddress: '0x48ed6be646240dee43890ad0fbf80999263b21db',
         contractAbi: [
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "getTokenPrice",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
             {
                 "constant": true,
                 "inputs": [
@@ -124,21 +211,7 @@
             {
                 "constant": true,
                 "inputs": [],
-                "name": "getContractOwner",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "address"
-                    }
-                ],
-                "payable": false,
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "constant": true,
-                "inputs": [],
-                "name": "getNumberOfAllTokens",
+                "name": "getNumberOfSoldTokens",
                 "outputs": [
                     {
                         "name": "",
@@ -166,7 +239,7 @@
             {
                 "constant": true,
                 "inputs": [],
-                "name": "getTokenPrice",
+                "name": "getNumberOfAllTokens",
                 "outputs": [
                     {
                         "name": "",
@@ -180,11 +253,11 @@
             {
                 "constant": true,
                 "inputs": [],
-                "name": "getNumberOfSoldTokens",
+                "name": "getContractOwner",
                 "outputs": [
                     {
                         "name": "",
-                        "type": "uint256"
+                        "type": "address"
                     }
                 ],
                 "payable": false,
@@ -193,16 +266,39 @@
             },
             {
                 "constant": false,
+                "inputs": [],
+                "name": "destroyContract",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "constant": false,
                 "inputs": [
                     {
-                        "name": "sum",
+                        "name": "_address",
+                        "type": "address"
+                    }
+                ],
+                "name": "setContractOwner",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "value",
                         "type": "uint256"
                     }
                 ],
-                "name": "buyTokens",
+                "name": "setNumberOfAllTokens",
                 "outputs": [],
-                "payable": true,
-                "stateMutability": "payable",
+                "payable": false,
+                "stateMutability": "nonpayable",
                 "type": "function"
             },
             {
@@ -226,34 +322,6 @@
                 "type": "constructor"
             },
             {
-                "constant": false,
-                "inputs": [
-                    {
-                        "name": "value",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "setNumberOfAllTokens",
-                "outputs": [],
-                "payable": false,
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "constant": false,
-                "inputs": [
-                    {
-                        "name": "_address",
-                        "type": "address"
-                    }
-                ],
-                "name": "setContractOwner",
-                "outputs": [],
-                "payable": false,
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
                 "payable": true,
                 "stateMutability": "payable",
                 "type": "fallback"
@@ -262,7 +330,53 @@
     };
 
     const contract = web3.eth.contract(config.contractAbi).at(config.contractAddress, (error, contract) => {
-        return contract
+        return contract;
+    });
+
+    let ethAddress = contract._eth.coinbase;
+
+    let start = new Vue({
+
+        el: '#start',
+
+        data: {
+            show: false
+        }
+    });
+
+    let signin = new Vue({
+
+        el: '#signin',
+
+        data: {
+            show: false,
+            address: null,
+            firstname: null,
+            lastname: null,
+            email: null
+        },
+
+        methods: {
+            getAddress() {
+                if (this.show)
+                    this.address = ethAddress;
+            },
+
+            signIn() {
+                let xmlHttpRequest = new XMLHttpRequest();
+                xmlHttpRequest.open("GET", "php/setUser.php?firstname="
+                    + this.firstname + "&lastname=" + this.lastname + "&email="
+                    + this.email + "&ethaddress=" + this.address, true);
+                xmlHttpRequest.onload = function () {
+                    if (xmlHttpRequest.readyState === 4) {
+                        if (xmlHttpRequest.status === 200) {
+                            alert(xmlHttpRequest.responseText);
+                        }
+                    }
+                };
+                xmlHttpRequest.send();
+            }
+        }
     });
 
     let wallet = new Vue({
@@ -270,39 +384,40 @@
         el: '#wallet',
 
         data: {
+            show: false,
             address: "",
             etherBalance: 0,
             bitCoinBalance: 0,
             tokens: 0
         },
 
-        mounted() {
-            this.getAddress();
-            this.getEtherBalance();
-            this.getNumberOfTokens();
-        },
-
         methods: {
             getAddress() {
-                this.address = web3.eth.defaultAccount;
+                if (this.show)
+                // this.address = web3.eth.defaultAccount;
+                    this.address = ethAddress;
             },
 
             getEtherBalance() {
-                contract._eth.getBalance(this.address, (error, balance) => {
-                    if (!error) {
-                        this.etherBalance = web3.fromWei(balance, 'ether').toNumber();
-                    } else
-                        console.log(error);
-                })
+                if (this.show)
+
+                    contract._eth.getBalance(this.address, (error, balance) => {
+                        if (!error) {
+                            this.etherBalance = web3.fromWei(balance, 'ether').toNumber();
+                        } else
+                            console.log(error);
+                    })
             },
 
             getNumberOfTokens() {
-                contract.getNumberOfTokens(this.address, (error, tokens) => {
-                    if (!error) {
-                        this.tokens = tokens.toNumber();
-                    } else
-                        console.log(error);
-                })
+                if (this.show)
+
+                    contract.getNumberOfTokens(this.address, (error, tokens) => {
+                        if (!error) {
+                            this.tokens = tokens.toNumber();
+                        } else
+                            console.log(error);
+                    })
             }
         }
     });
@@ -312,47 +427,66 @@
         el: '#tokens',
 
         data: {
+            show: false,
             amount: null
-        },
-
-        mounted() {
-            this.getTokenPrice();
         },
 
         methods: {
 
             getTokenPrice() {
-                contract.getTokenPrice(function (error, tokenPrice) {
-                    if (!error) {
-                        document.getElementById("tokenPrice").innerHTML = web3.fromWei(tokenPrice, 'ether').toNumber();
-                    } else
-                        console.log(error);
-                });
+                if (this.show)
+                    contract.getTokenPrice(function (error, tokenPrice) {
+                        if (!error) {
+                            document.getElementById("tokenPrice").innerHTML = web3.fromWei(tokenPrice, 'ether').toNumber();
+                        } else
+                            console.log(error);
+                    });
             },
 
-            buyTokens: function (event) {
+            buyTokens: function () {
                 if (this.amount <= 0) {
                     alert('Invalid amount!');
                     this.amount = null;
                     return;
                 }
 
-                let sum = web3.toWei(this.amount * document.getElementById("tokenPrice").innerHTML, 'ether');
+                let amount = this.amount;
+                let sum = amount * document.getElementById("tokenPrice").innerHTML;
+                let etherSum = web3.toWei(sum, 'ether');
 
-                contract.buyTokens(sum, function (error, result) {
+                // contract.buyTokens(sum, function (error, result) {
+                //     if (!error) {
+                //         console.log(result);
+                //     } else
+                //         console.log(error);
+                // });
+
+                web3.eth.sendTransaction({
+                    from: wallet.address,
+                    to: contract.address,
+                    value: etherSum,
+                    gasLimit: 21000,
+                    gasPrice: 20000000000
+                }, function (error, result) {
                     if (!error) {
                         console.log(result);
-                    } else
-                        console.log(error);
+                        let xmlHttpRequest = new XMLHttpRequest();
+                        xmlHttpRequest.open("GET", "php/setEthTransaction.php?date="
+                            + new Date() + "&sender=" + wallet.address + "&ethamount="
+                            + sum + "&tokenamount=" + amount, true);
+                        xmlHttpRequest.onload = function () {
+                            if (xmlHttpRequest.readyState === 4) {
+                                if (xmlHttpRequest.status === 200) {
+                                    console.log(xmlHttpRequest.responseText);
+                                }
+                            }
+                        };
+                        xmlHttpRequest.send();
+                    }
+                    else
+                        console.error(error);
                 });
 
-                // web3.eth.sendTransaction({
-                //     from: wallet.address,
-                //     to: contract.address,
-                //     value: sum,
-                //     gasLimit: 21000,
-                //     gasPrice: 20000000000
-                // });
 
                 wallet.getEtherBalance();
                 wallet.getNumberOfTokens();
@@ -377,62 +511,59 @@
             contractOwnerAddress: null
         },
 
-        mounted() {
-            this.getContractOwnerAddress();
-            this.getNumberOfAllTokens();
-            this.getNumberOfAvailableTokens();
-            this.getNumberOfSoldTokens();
-        },
-
         methods: {
             getContractOwnerAddress() {
-                contract.getContractOwner(function (error, contractOwner) {
-                    if (!error) {
-                        if (wallet.address === contractOwner) {
-                            ownerPanel.show = true;
-                        } else if (wallet.address !== contractOwner) {
-                            ownerPanel.show = false;
-                        }
-                    } else
-                        console.log(error);
-                });
+                if (this.show)
+                    contract.getContractOwner(function (error, contractOwner) {
+                        if (!error) {
+                            if (wallet.address === contractOwner) {
+                                ownerPanel.show = true;
+                            } else if (wallet.address !== contractOwner) {
+                                ownerPanel.show = false;
+                            }
+                        } else
+                            console.log(error);
+                    });
             },
 
             getNumberOfAllTokens() {
-                contract.getNumberOfAllTokens((error, allTokens) => {
-                    if (!error) {
-                        this.numberOfAllTokens = allTokens.toNumber();
-                    } else
-                        console.log(error);
-                })
+                if (this.show)
+                    contract.getNumberOfAllTokens((error, allTokens) => {
+                        if (!error) {
+                            this.numberOfAllTokens = allTokens.toNumber();
+                        } else
+                            console.log(error);
+                    })
             },
 
             getNumberOfAvailableTokens() {
-                contract.getNumberOfAvailableTokens((error, availableTokens) => {
-                    if (!error) {
-                        this.numberOfAvailableTokens = availableTokens.toNumber();
-                    } else
-                        console.log(error);
-                })
+                if (this.show)
+                    contract.getNumberOfAvailableTokens((error, availableTokens) => {
+                        if (!error) {
+                            this.numberOfAvailableTokens = availableTokens.toNumber();
+                        } else
+                            console.log(error);
+                    })
             },
 
             getNumberOfSoldTokens() {
-                contract.getNumberOfSoldTokens((error, soldTokens) => {
-                    if (!error) {
-                        this.numberOfSoldTokens = soldTokens.toNumber();
-                    } else
-                        console.log(error);
-                })
+                if (this.show)
+                    contract.getNumberOfSoldTokens((error, soldTokens) => {
+                        if (!error) {
+                            this.numberOfSoldTokens = soldTokens.toNumber();
+                        } else
+                            console.log(error);
+                    })
             },
 
-            setTokenPrice: function (event) {
+            setTokenPrice: function () {
                 if (this.price <= 0) {
                     alert('Invalid amount!');
                     this.price = null;
                     return;
                 }
 
-                contract.setTokenPrice(web3.toWei(this.price, 'ether'), (error, result) => {
+                contract.setTokenPrice(web3.toWei(this.price / tokenCourse, 'ether'), (error, result) => {
                     if (!error) {
                         console.log(result);
                     } else
@@ -444,7 +575,7 @@
                 this.price = null;
             },
 
-            setAllTokens: function (event) {
+            setAllTokens: function () {
                 if (this.amount <= 0) {
                     alert('Invalid amount!');
                     this.amount = null;
@@ -464,16 +595,16 @@
                 this.amount = null;
             },
 
-            refresh: function (event) {
+            refresh: function () {
                 tokens.getTokenPrice();
-                // getEthereumInfo();
+                getEthereumInfo();
                 this.getContractOwnerAddress();
                 this.getNumberOfAllTokens();
                 this.getNumberOfAvailableTokens();
                 this.getNumberOfSoldTokens();
             },
 
-            setContractOwner: function (event) {
+            setContractOwner: function () {
                 if (this.contractOwnerAddress === null) {
                     alert('Invalid amount!');
                     this.contractOwnerAddress = null;
@@ -486,122 +617,209 @@
                     } else
                         console.log(error);
                 });
+            },
+
+            destroyContract: function () {
+                contract.destroyContract((error, result) => {
+                    if (!error) {
+                        console.log(result);
+                    } else
+                        console.log(error);
+                });
             }
         }
     });
 
-    // let etherTransactions = new Vue({
-    //
-    //     el: '#etherTransactions',
-    //
-    //     data() {
-    //         return {
-    //             headers: [
-    //                 {align: 'left', text: 'To', value: 'to'},
-    //                 {align: 'left', text: 'From', value: 'from'},
-    //                 {align: 'left', text: 'Amount', value: 'amount'}
-    //             ],
-    //             items: []
-    //         }
-    //     },
-    //
-    //     mounted() {
-    //
-    //         // getTransactionsByAccount(web3.eth.coinbase);
-    //
-    //         web3.eth.filter({
-    //             address: web3.eth.coinbase,
-    //             from: 1,
-    //             to: 'latest'
-    //         }).get(function (err, result) {
-    //             console.log(result);
-    //         });
-    //
-    //         contract.Transfer({}, {fromBlock: 0, toBlock: 'pending'}, (err, res) => {
-    //             console.log(this.items);
-    //
-    //             if (res.args.to === contract._eth.coinbase || res.args.from === contract._eth.coinbase) {
-    //                 this.items.push({
-    //                     to: res.args.to,
-    //                     from: res.args.from,
-    //                     amount: web3.fromWei(res.args.value).toNumber()
-    //                 });
-    //             }
-    //         })
-    //     }
-    // });
+    function checkEthAddress(item) {
+        return item === ethAddress;
+    }
+
+    function changeView(showStart, showSignin, showWallet, showTokens, showOwnerPanel) {
+        start.show = showStart;
+
+        signin.show = showSignin;
+        signin.getAddress();
+
+        wallet.show = showWallet;
+        wallet.getAddress();
+        wallet.getEtherBalance();
+        wallet.getNumberOfTokens();
+
+        tokens.show = showTokens;
+        tokens.getTokenPrice();
+
+        ownerPanel.show = showOwnerPanel;
+        ownerPanel.getContractOwnerAddress();
+        ownerPanel.getNumberOfAllTokens();
+        ownerPanel.getNumberOfAvailableTokens();
+        ownerPanel.getNumberOfSoldTokens();
+    }
+
+    let xmlHttpRequest = new XMLHttpRequest();
+    xmlHttpRequest.open("GET", "php/getUserList.php", true);
+    xmlHttpRequest.onload = function () {
+        if (xmlHttpRequest.readyState === 4) {
+            if (xmlHttpRequest.status === 200) {
+                let userList = xmlHttpRequest.responseText.split("_");
+                let ethAddressList = [];
+
+                let userTable = document.getElementById("userListTable");
+
+                for (let i = 0; i < userTable.rows.length; i++) {
+                    userTable.deleteRow(i);
+                }
+
+                for (let i = 0; i < userList.length - 1; i++) {
+                    let userDataList = userList[i].split(" ");
+                    let row = userTable.insertRow(0);
+                    let cell0 = row.insertCell(0);
+                    let cell1 = row.insertCell(1);
+                    let cell2 = row.insertCell(2);
+                    let cell3 = row.insertCell(3);
+                    let cell4 = row.insertCell(4);
+                    cell0.innerHTML = userDataList[0];
+                    cell1.innerHTML = userDataList[1];
+                    cell2.innerHTML = userDataList[2];
+                    cell3.innerHTML = userDataList[3];
+                    ethAddressList.push(userDataList[3]);
+                    contract.getNumberOfTokens(userDataList[3], (error, tokens) => {
+                        if (!error) {
+                            cell4.innerHTML = tokens.toNumber();
+                        } else
+                            console.log(error);
+                    });
+                }
+
+                if (!ethAddress) {
+                    changeView(true, false, false, false, false);
+                } else if (ethAddress) {
+                    if (ethAddressList.some(checkEthAddress)) {
+                        changeView(false, false, true, true, true);
+                    } else {
+                        changeView(false, true, false, false, false);
+                    }
+                }
+            }
+        }
+    };
+    xmlHttpRequest.send();
+
+    let xmlHttpRequest1 = new XMLHttpRequest();
+    xmlHttpRequest1.open("GET", "php/getEthTransactionList.php", true);
+    xmlHttpRequest1.onload = function () {
+        if (xmlHttpRequest1.readyState === 4) {
+            if (xmlHttpRequest1.status === 200) {
+                let ethTransactionList = xmlHttpRequest1.responseText.split("^");
+
+                let ethTransactionListTable = document.getElementById("ethTransactionListTable");
+                let ethTransactionsTable = document.getElementById("ethTransactionsTable");
+
+                for (let i = 0; i < ethTransactionListTable.rows.length; i++) {
+                    ethTransactionListTable.deleteRow(i);
+                }
+                for (let i = 0; i < ethTransactionsTable.rows.length; i++) {
+                    ethTransactionsTable.deleteRow(i);
+                }
+
+                for (let i = 0; i < ethTransactionList.length - 1; i++) {
+                    let ethTransactionDataList = ethTransactionList[i].split("_");
+                    let row = ethTransactionListTable.insertRow(0);
+                    let cell0 = row.insertCell(0);
+                    let cell1 = row.insertCell(1);
+                    let cell2 = row.insertCell(2);
+                    let cell3 = row.insertCell(3);
+                    cell0.innerHTML = ethTransactionDataList[0];
+                    cell1.innerHTML = ethTransactionDataList[1];
+                    cell2.innerHTML = ethTransactionDataList[2];
+                    cell3.innerHTML = ethTransactionDataList[3];
+
+                    if (wallet.address === ethTransactionDataList[1]){
+                        let row = ethTransactionsTable.insertRow(0);
+                        let cell0 = row.insertCell(0);
+                        let cell1 = row.insertCell(1);
+                        let cell2 = row.insertCell(2);
+                        cell0.innerHTML = ethTransactionDataList[0];
+                        cell1.innerHTML = ethTransactionDataList[2];
+                        cell2.innerHTML = ethTransactionDataList[3];
+                    }
+                }
+            }
+        }
+    };
+    xmlHttpRequest1.send();
 
     // getBitCoinInfo();
 
-    // function getBitCoinInfo() {
-    //     let jsonObject = {};
-    //     let payments = {};
-    //     let current = {};
-    //
-    //     let xmlHttpRequest = new XMLHttpRequest();
-    //     xmlHttpRequest.open("GET", "php/getBitCoinInfo.php", true);
-    //     xmlHttpRequest.onload = function () {
-    //         if (xmlHttpRequest.readyState === 4) {
-    //             if (xmlHttpRequest.status === 200) {
-    //                 jsonObject = JSON.parse(xmlHttpRequest.responseText);
-    //
-    //                 payments = jsonObject.result.payments;
-    //                 current = jsonObject.result.current;
-    //
-    //                 let table = document.getElementById("bitCoinTransactionsTable");
-    //
-    //                 if (payments && current) {
-    //
-    //                     for (let i = 0; i < table.rows.length; i++) {
-    //                         table.deleteRow(i);
-    //                     }
-    //
-    //                     for (let i = 0; i < payments.length; i++) {
-    //                         let row = table.insertRow(0);
-    //                         let cell0 = row.insertCell(0);
-    //                         let cell1 = row.insertCell(1);
-    //                         let cell2 = row.insertCell(2);
-    //                         let cell3 = row.insertCell(3);
-    //                         cell0.innerHTML = new Date(payments[i].time * 1000);
-    //                         cell1.innerHTML = payments[i].TXID;
-    //                         cell2.innerHTML = (payments[i].amount / ownerPanel.allTokens) * wallet.tokens;
-    //                         cell3.innerHTML = (payments[i].fee / ownerPanel.allTokens) * wallet.tokens;
-    //                     }
-    //
-    //                     wallet.bitCoinBalance = 0;
-    //                     for (let i = 0; i < current.length; i++) {
-    //                         wallet.bitCoinBalance += (Number(current[i].data[1]) / ownerPanel.allTokens) * wallet.tokens;
-    //                     }
-    //                 } else alert("Failed to load resource, request must wait every 30 seconds until stats are refreshed");
-    //             }
-    //         }
-    //     };
-    //     xmlHttpRequest.onerror = function () {
-    //         alert("Failed to load resource, request must wait every 30 seconds until stats are refreshed");
-    //     };
-    //     xmlHttpRequest.send();
-    // }
+    function getBitCoinInfo() {
+        let jsonObject = {};
+        let payments = {};
+        let current = {};
 
-    // getEthereumInfo();
+        let xmlHttpRequest = new XMLHttpRequest();
+        xmlHttpRequest.open("GET", "php/getBitCoinInfo.php", true);
+        xmlHttpRequest.onload = function () {
+            if (xmlHttpRequest.readyState === 4) {
+                if (xmlHttpRequest.status === 200) {
+                    jsonObject = JSON.parse(xmlHttpRequest.responseText);
 
-    // function getEthereumInfo() {
-    //     let jsonObject = {};
-    //
-    //     let xmlHttpRequest = new XMLHttpRequest();
-    //     xmlHttpRequest.open("GET", "php/getEthereumInfo.php", true);
-    //     xmlHttpRequest.onload = function () {
-    //         if (xmlHttpRequest.readyState === 4) {
-    //             if (xmlHttpRequest.status === 200) {
-    //                 jsonObject = JSON.parse(xmlHttpRequest.responseText);
-    //                 console.log(Number(document.getElementById("tokenPrice").innerHTML) * Number(jsonObject[1].price_usd));
-    //                 console.log(document.getElementById("tokenCourse"));
-    //                 // tokenCourse.innerHTML = Number(document.getElementById("tokenPrice").innerHTML) * Number(jsonObject[1].price_usd);
-    //             }
-    //         }
-    //     };
-    //
-    //     xmlHttpRequest.send();
-    // }
+                    payments = jsonObject.result.payments;
+                    current = jsonObject.result.current;
+
+                    let table = document.getElementById("bitCoinTransactionsTable");
+
+                    if (payments && current) {
+
+                        for (let i = 0; i < table.rows.length; i++) {
+                            table.deleteRow(i);
+                        }
+
+                        for (let i = 0; i < payments.length; i++) {
+                            let row = table.insertRow(0);
+                            let cell0 = row.insertCell(0);
+                            let cell1 = row.insertCell(1);
+                            let cell2 = row.insertCell(2);
+                            let cell3 = row.insertCell(3);
+                            cell0.innerHTML = new Date(payments[i].time * 1000);
+                            cell1.innerHTML = payments[i].TXID;
+                            cell2.innerHTML = (payments[i].amount / ownerPanel.allTokens) * wallet.tokens;
+                            cell3.innerHTML = (payments[i].fee / ownerPanel.allTokens) * wallet.tokens;
+                        }
+
+                        wallet.bitCoinBalance = 0;
+                        for (let i = 0; i < current.length; i++) {
+                            wallet.bitCoinBalance += (Number(current[i].data[1]) / ownerPanel.allTokens) * wallet.tokens;
+                        }
+                    } else alert("Failed to load resource, request must wait every 30 seconds until stats are refreshed");
+                }
+            }
+        };
+        xmlHttpRequest.onerror = function () {
+            alert("Failed to load resource, request must wait every 30 seconds until stats are refreshed");
+        };
+        xmlHttpRequest.send();
+    }
+
+    getEthereumInfo();
+
+    let tokenCourse = 0;
+
+    function getEthereumInfo() {
+        let jsonObject = {};
+
+        let xmlHttpRequest = new XMLHttpRequest();
+        xmlHttpRequest.open("GET", "php/getEthereumInfo.php", true);
+        xmlHttpRequest.onload = function () {
+            if (xmlHttpRequest.readyState === 4) {
+                if (xmlHttpRequest.status === 200) {
+                    jsonObject = JSON.parse(xmlHttpRequest.responseText);
+                    tokenCourse = Number(jsonObject[1].price_usd);
+                    document.getElementById("tokenCourse").innerHTML = Number(document.getElementById("tokenPrice").innerHTML) * tokenCourse;
+                }
+            }
+        };
+
+        xmlHttpRequest.send();
+    }
 
 </script>
 

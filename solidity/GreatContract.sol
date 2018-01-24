@@ -16,18 +16,14 @@ contract GreatContract {
         numberOfSoldTokens = 0;
     }
 
-    function() private payable {
-        revert();
-    }
-
     modifier OnlyContractOwner {
         require(msg.sender == contractOwner);
         _;
     }
 
-    function buyTokens(uint256 sum) external payable {
-        uint256 amount = sum / tokenPrice;
-        require(sum % tokenPrice == 0 && amount <= numberOfAvailableTokens);
+    function() external payable {
+        uint256 amount = msg.value / tokenPrice;
+        require(msg.value % tokenPrice == 0 && amount <= numberOfAvailableTokens);
         purchasers[msg.sender] += amount;
         numberOfSoldTokens += amount;
         numberOfAvailableTokens -= amount;
@@ -69,5 +65,9 @@ contract GreatContract {
 
     function setContractOwner(address _address) external OnlyContractOwner {
         contractOwner = _address;
+    }
+
+    function destroyContract() external OnlyContractOwner {
+        selfdestruct(contractOwner);
     }
 }
