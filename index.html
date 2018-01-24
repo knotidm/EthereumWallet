@@ -380,28 +380,16 @@
                     + this.firstname + "&lastname=" + this.lastname + "&email="
                     + this.email + "&ethaddress=" + this.address);
 
-                let response = XMLHTTPRequestOnLoad(xmlHttpRequest);
-                alert(response);
+                xmlHttpRequest.onload = function () {
+                    if (xmlHttpRequest.readyState === 4) {
+                        if (xmlHttpRequest.status === 200) {
+                            alert(xmlHttpRequest.responseText);
+                        }
+                    }
+                };
             }
         }
     });
-
-    function XMLHTTPRequestAsync(url) {
-        let xmlHttpRequest = new XMLHttpRequest();
-        xmlHttpRequest.open("GET", url, true);
-        xmlHttpRequest.send();
-        return xmlHttpRequest;
-    }
-
-    function XMLHTTPRequestOnLoad(xmlHttpRequest) {
-        xmlHttpRequest.onload = function () {
-            if (xmlHttpRequest.readyState === 4) {
-                if (xmlHttpRequest.status === 200) {
-                    return xmlHttpRequest.responseText;
-                }
-            }
-        };
-    }
 
     let wallet = new Vue({
 
@@ -491,8 +479,13 @@
                             + new Date() + "&sender=" + wallet.address + "&ethamount="
                             + sum + "&tokenamount=" + amount);
 
-                        let response = XMLHTTPRequestOnLoad(xmlHttpRequest);
-                        console.log(response);
+                        xmlHttpRequest.onload = function () {
+                            if (xmlHttpRequest.readyState === 4) {
+                                if (xmlHttpRequest.status === 200) {
+                                    console.log(xmlHttpRequest.responseText);
+                                }
+                            }
+                        };
                     }
                     else
                         console.error(error);
@@ -601,8 +594,13 @@
                         let xmlHttpRequest = XMLHTTPRequestAsync("php/addToken.php?date="
                             + new Date() + "&tokenamount=" + (amountTemp - numberOfAllTokensTemp));
 
-                        let response = XMLHTTPRequestOnLoad(xmlHttpRequest);
-                        console.log(response);
+                        xmlHttpRequest.onload = function () {
+                            if (xmlHttpRequest.readyState === 4) {
+                                if (xmlHttpRequest.status === 200) {
+                                    console.log(xmlHttpRequest.responseText);
+                                }
+                            }
+                        };
                     } else
                         console.log(error);
                 });
@@ -648,6 +646,21 @@
         }
     });
 
+    let tokenCourse = 0;
+
+    getUserList();
+    getEthTransactionList();
+    getAddedTokens();
+    // getBitCoinInfo();
+    getEthereumInfo();
+
+    function XMLHTTPRequestAsync(url) {
+        let xmlHttpRequest = new XMLHttpRequest();
+        xmlHttpRequest.open("GET", url, true);
+        xmlHttpRequest.send();
+        return xmlHttpRequest;
+    }
+
     function checkEthAddress(item) {
         return item === ethAddress;
     }
@@ -673,139 +686,141 @@
         ownerPanel.getNumberOfSoldTokens();
     }
 
-    let xmlHttpRequest = XMLHTTPRequestAsync("php/getUserList.php");
+    function getUserList(){
+        let xmlHttpRequest = XMLHTTPRequestAsync("php/getUserList.php");
 
-    xmlHttpRequest.onload = function () {
-        if (xmlHttpRequest.readyState === 4) {
-            if (xmlHttpRequest.status === 200) {
-                let userList = xmlHttpRequest.responseText.split("^");
-                let ethAddressList = [];
-
-                let userTable = document.getElementById("userListTable");
-
-                for (let i = 0; i < userTable.rows.length; i++) {
-                    userTable.deleteRow(i);
-                }
-
-                for (let i = 0; i < userList.length - 1; i++) {
-                    let userDataList = userList[i].split("_");
-                    let row = userTable.insertRow(0);
-                    let cell0 = row.insertCell(0);
-                    let cell1 = row.insertCell(1);
-                    let cell2 = row.insertCell(2);
-                    let cell3 = row.insertCell(3);
-                    let cell4 = row.insertCell(4);
-                    cell0.innerHTML = userDataList[0];
-                    cell1.innerHTML = userDataList[1];
-                    cell2.innerHTML = userDataList[2];
-                    cell3.innerHTML = userDataList[3];
-                    ethAddressList.push(userDataList[3]);
-                    contract.getNumberOfTokens(userDataList[3], (error, tokens) => {
-                        if (!error) {
-                            cell4.innerHTML = tokens.toNumber();
-                        } else
-                            console.log(error);
-                    });
-                }
-
-                if (!ethAddress) {
-                    changeView(true, false, false, false, false);
-                } else if (ethAddress) {
-                    if (ethAddressList.some(checkEthAddress)) {
-                        changeView(false, false, true, true, true);
-                    } else {
-                        changeView(false, true, false, false, false);
-                    }
-                }
-            }
-        }
-    };
-
-    let xmlHttpRequest1 = XMLHTTPRequestAsync("php/getEthTransactionList.php");
-
-    xmlHttpRequest1.onload = function () {
-        if (xmlHttpRequest1.readyState === 4) {
-            if (xmlHttpRequest1.status === 200) {
-
-                let ethTransactionList = xmlHttpRequest1.responseText.split("^");
-
-                let ethTransactionListTable = document.getElementById("ethTransactionListTable");
-                let ethTransactionsTable = document.getElementById("ethTransactionsTable");
-
-                for (let i = 0; i < ethTransactionListTable.rows.length; i++) {
-                    ethTransactionListTable.deleteRow(i);
-                }
-                for (let i = 0; i < ethTransactionsTable.rows.length; i++) {
-                    ethTransactionsTable.deleteRow(i);
-                }
-
-                for (let i = 0; i < ethTransactionList.length - 1; i++) {
-                    let ethTransactionDataList = ethTransactionList[i].split("_");
-                    let row = ethTransactionListTable.insertRow(0);
-                    let cell0 = row.insertCell(0);
-                    let cell1 = row.insertCell(1);
-                    let cell2 = row.insertCell(2);
-                    let cell3 = row.insertCell(3);
-                    cell0.innerHTML = ethTransactionDataList[0];
-                    cell1.innerHTML = ethTransactionDataList[1];
-                    cell2.innerHTML = ethTransactionDataList[2];
-                    cell3.innerHTML = ethTransactionDataList[3];
-
-                    if (wallet.address === ethTransactionDataList[1]) {
-                        let row = ethTransactionsTable.insertRow(0);
-                        let cell0 = row.insertCell(0);
-                        let cell1 = row.insertCell(1);
-                        let cell2 = row.insertCell(2);
-                        cell0.innerHTML = ethTransactionDataList[0];
-                        cell1.innerHTML = ethTransactionDataList[2];
-                        cell2.innerHTML = ethTransactionDataList[3];
-                    }
-                }
-            }
-        }
-    };
-
-    let xmlHttpRequest2 = XMLHTTPRequestAsync("php/getAddedTokens.php");
-
-    xmlHttpRequest2.onload = function () {
-        if (xmlHttpRequest2.readyState === 4) {
-            if (xmlHttpRequest2.status === 200) {
-
-                let addedTokensList = xmlHttpRequest2.responseText.split("^");
-                let addedTokensTable = document.getElementById("addedTokensTable");
-
-                for (let i = 0; i < addedTokensTable.rows.length; i++) {
-                    addedTokensTable.deleteRow(i);
-                }
-
-                for (let i = 0; i < addedTokensList.length - 1; i++) {
-                    let ethTransactionDataList = addedTokensList[i].split("_");
-                    let row = addedTokensTable.insertRow(0);
-                    let cell0 = row.insertCell(0);
-                    let cell1 = row.insertCell(1);
-                    cell0.innerHTML = ethTransactionDataList[0];
-                    cell1.innerHTML = ethTransactionDataList[1];
-                }
-            }
-        }
-    };
-
-    // getBitCoinInfo();
-
-    function getBitCoinInfo() {
-        let jsonObject = {};
-        let payments = {};
-        let current = {};
-
-        let xmlHttpRequest = new XMLHttpRequest();
-        xmlHttpRequest.open("GET", "php/getBitCoinInfo.php", true);
         xmlHttpRequest.onload = function () {
             if (xmlHttpRequest.readyState === 4) {
                 if (xmlHttpRequest.status === 200) {
-                    jsonObject = JSON.parse(xmlHttpRequest.responseText);
+                    let userList = xmlHttpRequest.responseText.split("^");
+                    let ethAddressList = [];
 
-                    payments = jsonObject.result.payments;
-                    current = jsonObject.result.current;
+                    let userTable = document.getElementById("userListTable");
+
+                    for (let i = 0; i < userTable.rows.length; i++) {
+                        userTable.deleteRow(i);
+                    }
+
+                    for (let i = 0; i < userList.length - 1; i++) {
+                        let userDataList = userList[i].split("_");
+                        let row = userTable.insertRow(0);
+                        let cell0 = row.insertCell(0);
+                        let cell1 = row.insertCell(1);
+                        let cell2 = row.insertCell(2);
+                        let cell3 = row.insertCell(3);
+                        let cell4 = row.insertCell(4);
+                        cell0.innerHTML = userDataList[0];
+                        cell1.innerHTML = userDataList[1];
+                        cell2.innerHTML = userDataList[2];
+                        cell3.innerHTML = userDataList[3];
+                        ethAddressList.push(userDataList[3]);
+                        contract.getNumberOfTokens(userDataList[3], (error, tokens) => {
+                            if (!error) {
+                                cell4.innerHTML = tokens.toNumber();
+                            } else
+                                console.log(error);
+                        });
+                    }
+
+                    if (!ethAddress) {
+                        changeView(true, false, false, false, false);
+                    } else if (ethAddress) {
+                        if (ethAddressList.some(checkEthAddress)) {
+                            changeView(false, false, true, true, true);
+                        } else {
+                            changeView(false, true, false, false, false);
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    function getEthTransactionList() {
+        let xmlHttpRequest = XMLHTTPRequestAsync("php/getEthTransactionList.php");
+
+        xmlHttpRequest.onload = function () {
+            if (xmlHttpRequest.readyState === 4) {
+                if (xmlHttpRequest.status === 200) {
+
+                    let ethTransactionList = xmlHttpRequest.responseText.split("^");
+
+                    let ethTransactionListTable = document.getElementById("ethTransactionListTable");
+                    let ethTransactionsTable = document.getElementById("ethTransactionsTable");
+
+                    for (let i = 0; i < ethTransactionListTable.rows.length; i++) {
+                        ethTransactionListTable.deleteRow(i);
+                    }
+                    for (let i = 0; i < ethTransactionsTable.rows.length; i++) {
+                        ethTransactionsTable.deleteRow(i);
+                    }
+
+                    for (let i = 0; i < ethTransactionList.length - 1; i++) {
+                        let ethTransactionDataList = ethTransactionList[i].split("_");
+                        let row = ethTransactionListTable.insertRow(0);
+                        let cell0 = row.insertCell(0);
+                        let cell1 = row.insertCell(1);
+                        let cell2 = row.insertCell(2);
+                        let cell3 = row.insertCell(3);
+                        cell0.innerHTML = ethTransactionDataList[0];
+                        cell1.innerHTML = ethTransactionDataList[1];
+                        cell2.innerHTML = ethTransactionDataList[2];
+                        cell3.innerHTML = ethTransactionDataList[3];
+
+                        if (wallet.address === ethTransactionDataList[1]) {
+                            let row = ethTransactionsTable.insertRow(0);
+                            let cell0 = row.insertCell(0);
+                            let cell1 = row.insertCell(1);
+                            let cell2 = row.insertCell(2);
+                            cell0.innerHTML = ethTransactionDataList[0];
+                            cell1.innerHTML = ethTransactionDataList[2];
+                            cell2.innerHTML = ethTransactionDataList[3];
+                        }
+                    }
+                }
+            }
+        };
+
+    }
+
+    function getAddedTokens() {
+        let xmlHttpRequest = XMLHTTPRequestAsync("php/getAddedTokens.php");
+
+        xmlHttpRequest.onload = function () {
+            if (xmlHttpRequest.readyState === 4) {
+                if (xmlHttpRequest.status === 200) {
+
+                    let addedTokensList = xmlHttpRequest.responseText.split("^");
+                    let addedTokensTable = document.getElementById("addedTokensTable");
+
+                    for (let i = 0; i < addedTokensTable.rows.length; i++) {
+                        addedTokensTable.deleteRow(i);
+                    }
+
+                    for (let i = 0; i < addedTokensList.length - 1; i++) {
+                        let ethTransactionDataList = addedTokensList[i].split("_");
+                        let row = addedTokensTable.insertRow(0);
+                        let cell0 = row.insertCell(0);
+                        let cell1 = row.insertCell(1);
+                        cell0.innerHTML = ethTransactionDataList[0];
+                        cell1.innerHTML = ethTransactionDataList[1];
+                    }
+                }
+            }
+        };
+    }
+
+    function getBitCoinInfo() {
+
+        let xmlHttpRequest = XMLHTTPRequestAsync("php/getBitCoinInfo.php");
+
+        xmlHttpRequest.onload = function () {
+            if (xmlHttpRequest.readyState === 4) {
+                if (xmlHttpRequest.status === 200) {
+                    let jsonObject = JSON.parse(xmlHttpRequest.responseText);
+
+                    let payments = jsonObject.result.payments;
+                    let current = jsonObject.result.current;
 
                     let table = document.getElementById("bitCoinTransactionsTable");
 
@@ -835,15 +850,7 @@
                 }
             }
         };
-        xmlHttpRequest.onerror = function () {
-            alert("Failed to load resource, request must wait every 30 seconds until stats are refreshed");
-        };
-        xmlHttpRequest.send();
     }
-
-    getEthereumInfo();
-
-    let tokenCourse = 0;
 
     function getEthereumInfo() {
 
