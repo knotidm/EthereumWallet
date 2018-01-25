@@ -21,7 +21,7 @@
 <div id="start" class="container" v-if="show" style="padding-left: 25%; padding-top: 15%">
     <h1>Your MetaMask is locked</h1>
     <h3>Simply open MetaMask and unlock your account</h3>
-    <h3>If You don't know what is MetaMask <a target="_blank" href="https://youtu.be/tfETpi-9ORs">click here</a></h3>
+    <h3>If you don't know MetaMask <a target="_blank" href="https://youtu.be/tfETpi-9ORs">click here</a></h3>
 </div>
 
 <div id="signin" class="container" v-if="show" style="padding-left: 35%; padding-top: 10%">
@@ -69,7 +69,7 @@
     </div>
 </div>
 
-<div class="row" style="padding-left: 25px">
+<div id="ethTransactions" class="row" style="padding-left: 25px;visibility: hidden;">
 
     <div class="col-md-5">
         <p class="page-header" style="color:wheat;">ETH Transactions</p>
@@ -126,7 +126,7 @@
             </li>
         </ul>
     </div>
-    <div class="col-md-5">
+    <div id="addedTokens" class="col-md-5" style="visibility: hidden">
         <p class="page-header" style="color:wheat;">Added Tokens</p>
         <table class="table">
             <thead>
@@ -140,43 +140,39 @@
         </table>
     </div>
 </div>
-<div class="row" style="padding-left: 25px">
-    <div class="row" style="padding-left: 25px">
-        <div class="col-md-10">
-            <p class="page-header" style="color:wheat;">User List</p>
-            <table class="table">
-                <thead>
-                <tr class="text-info">
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Email</th>
-                    <th>Eth Address</th>
-                    <th>Tokens</th>
-                </tr>
-                </thead>
-                <tbody id="userListTable">
-                </tbody>
-            </table>
-        </div>
+<div id="userList" class="row" style="padding-left: 25px;visibility: hidden;">
+    <div class="col-md-10">
+        <p class="page-header" style="color:wheat;">User List</p>
+        <table class="table">
+            <thead>
+            <tr class="text-info">
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Eth Address</th>
+                <th>Tokens</th>
+            </tr>
+            </thead>
+            <tbody id="userListTable">
+            </tbody>
+        </table>
     </div>
 </div>
-<div class="row" style="padding-left: 25px">
-    <div class="row" style="padding-left: 25px">
-        <div class="col-md-10">
-            <p class="page-header" style="color:wheat;">ETH Transaction List</p>
-            <table class="table">
-                <thead>
-                <tr class="text-info">
-                    <th>Date</th>
-                    <th>Sender</th>
-                    <th>Eth Amount</th>
-                    <th>Token Amount</th>
-                </tr>
-                </thead>
-                <tbody id="ethTransactionListTable">
-                </tbody>
-            </table>
-        </div>
+<div id="ethTransactionList" class="row" style="padding-left: 25px;visibility: hidden;">
+    <div class="col-md-10">
+        <p class="page-header" style="color:wheat;">ETH Transaction List</p>
+        <table class="table">
+            <thead>
+            <tr class="text-info">
+                <th>Date</th>
+                <th>Sender</th>
+                <th>Eth Amount</th>
+                <th>Token Amount</th>
+            </tr>
+            </thead>
+            <tbody id="ethTransactionListTable">
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -186,7 +182,7 @@
     // web3.eth.defaultAccount = web3.eth.accounts[1];
 
     const config = {
-        contractAddress: '0x48ed6be646240dee43890ad0fbf80999263b21db',
+        contractAddress: '0x05bfd66c2bc2b8c9139bb831ad92cb4ff791810b',
         contractAbi: [
             {
                 "constant": true,
@@ -515,19 +511,20 @@
         },
 
         methods: {
-            getContractOwnerAddress() {
-                if (this.show)
-                    contract.getContractOwner(function (error, contractOwner) {
-                        if (!error) {
-                            if (wallet.address === contractOwner) {
-                                ownerPanel.show = true;
-                            } else if (wallet.address !== contractOwner) {
-                                ownerPanel.show = false;
-                            }
-                        } else
-                            console.log(error);
-                    });
-            },
+            // getContractOwnerAddress() {
+            //
+            //     if (this.show)
+            //         contract.getContractOwner(function (error, contractOwner) {
+            //             if (!error) {
+            //                 if (wallet.address === contractOwner) {
+            //                     this.show = true;
+            //                 } else if (wallet.address !== contractOwner) {
+            //                     this.show = false;
+            //                 }
+            //             } else
+            //                 console.log(error);
+            //         });
+            // },
 
             getNumberOfAllTokens() {
                 if (this.show)
@@ -665,28 +662,55 @@
         return item === ethAddress;
     }
 
-    function changeView(showStart, showSignin, showWallet, showTokens, showOwnerPanel) {
+    function changeView(showStart, showSignin, showWalletAndTokens) {
         start.show = showStart;
 
         signin.show = showSignin;
         signin.getAddress();
 
-        wallet.show = showWallet;
+        wallet.show = showWalletAndTokens;
         wallet.getAddress();
         wallet.getEtherBalance();
         wallet.getNumberOfTokens();
 
-        tokens.show = showTokens;
+        tokens.show = showWalletAndTokens;
         tokens.getTokenPrice();
 
-        ownerPanel.show = showOwnerPanel;
-        ownerPanel.getContractOwnerAddress();
-        ownerPanel.getNumberOfAllTokens();
-        ownerPanel.getNumberOfAvailableTokens();
-        ownerPanel.getNumberOfSoldTokens();
+        document.getElementById("ethTransactions").style.visibility = showWalletAndTokens ? "visible" : "hidden";
+
+        contract.getContractOwner(function (error, contractOwner) {
+            if (!error) {
+                if (ethAddress === contractOwner) {
+
+                    signin.show = false;
+                    wallet.show = true;
+                    wallet.getAddress();
+                    wallet.getEtherBalance();
+                    wallet.getNumberOfTokens();
+                    tokens.show = true;
+                    tokens.getTokenPrice();
+                    ownerPanel.show = true;
+                    ownerPanel.getNumberOfAllTokens();
+                    ownerPanel.getNumberOfAvailableTokens();
+                    ownerPanel.getNumberOfSoldTokens();
+
+                    document.getElementById("ethTransactions").style.visibility = "hidden";
+                    document.getElementById("addedTokens").style.visibility =
+                        document.getElementById("userList").style.visibility =
+                            document.getElementById("ethTransactionList").style.visibility = "visible";
+
+                } else if (ethAddress !== contractOwner) {
+                    ownerPanel.show = false;
+                    document.getElementById("addedTokens").style.visibility =
+                        document.getElementById("userList").style.visibility =
+                            document.getElementById("ethTransactionList").style.visibility = "hidden";
+                }
+            } else
+                console.log(error);
+        });
     }
 
-    function getUserList(){
+    function getUserList() {
         let xmlHttpRequest = XMLHTTPRequestAsync("php/getUserList.php");
 
         xmlHttpRequest.onload = function () {
@@ -723,12 +747,12 @@
                     }
 
                     if (!ethAddress) {
-                        changeView(true, false, false, false, false);
+                        changeView(true, false, false);
                     } else if (ethAddress) {
-                        if (ethAddressList.some(checkEthAddress)) {
-                            changeView(false, false, true, true, true);
-                        } else {
-                            changeView(false, true, false, false, false);
+                        if (!ethAddressList.some(checkEthAddress)) {
+                            changeView(false, true, false);
+                        } else if (ethAddressList.some(checkEthAddress)) {
+                            changeView(false, false, true);
                         }
                     }
                 }
