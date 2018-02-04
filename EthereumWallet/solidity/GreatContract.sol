@@ -10,7 +10,7 @@ contract GreatContract {
 
     function GreatContract() public {
         contractOwner = msg.sender;
-        tokenPrice = 0.79 ether;
+        tokenPrice = 100;
         numberOfAllTokens = 12;
         numberOfAvailableTokens = numberOfAllTokens;
         numberOfSoldTokens = 0;
@@ -22,12 +22,14 @@ contract GreatContract {
     }
 
     function() external payable {
-        uint256 amount = msg.value / tokenPrice;
-        require(msg.value % tokenPrice == 0 && amount <= numberOfAvailableTokens);
+    }
+
+	function buyTokens(uint256 amount) external {
+	    require(amount <= numberOfAvailableTokens);
         purchasers[msg.sender] += amount;
         numberOfSoldTokens += amount;
         numberOfAvailableTokens -= amount;
-    }
+	}
 
     function getContractOwner() external constant returns (address) {
         return (contractOwner);
@@ -45,7 +47,7 @@ contract GreatContract {
         tokenPrice = value;
     }
 
-    function getNumberOfAllTokens() external OnlyContractOwner constant returns (uint256) {
+    function getNumberOfAllTokens() external constant returns (uint256) {
         return numberOfAllTokens;
     }
 

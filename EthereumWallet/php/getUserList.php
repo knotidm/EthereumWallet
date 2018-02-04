@@ -1,6 +1,6 @@
 <?php
 
-$host = "coinwallet.chkcjw9gpmwh.eu-west-2.rds.amazonaws.com";
+$host = "coinwallet.c26ysish9yud.eu-west-3.rds.amazonaws.com";
 $username = "coinwallet";
 $password = "coinwallet";
 $dbname = "coinwallet";
@@ -16,7 +16,7 @@ $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        echo $row["firstname"] . "_" . $row["lastname"] . "_" . $row["email"] . "_" . $row["ethaddress"] . "^";
+        echo $row["firstname"] . "_" . $row["lastname"] . "_" . $row["email"] . "_" . $row["ethaddress"] . "_" . $row["balance"] . "^";
     }
 } else {
     echo "0 results";
