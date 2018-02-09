@@ -200,170 +200,7 @@
 
         // let web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
         // web3.eth.defaultAccount = web3.eth.accounts[1];
-
-        const config = {
-            contractAddress: '0xb2ac11d08a062b2bab00abeaae1ff9ab62b37831',
-            contractAbi: [
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "getTokenPrice",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [
-                        {
-                            "name": "_address",
-                            "type": "address"
-                        }
-                    ],
-                    "name": "getNumberOfTokens",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "getNumberOfSoldTokens",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "getNumberOfAvailableTokens",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "getNumberOfAllTokens",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "getContractOwner",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "address"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "constant": false,
-                    "inputs": [],
-                    "name": "destroyContract",
-                    "outputs": [],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "_address",
-                            "type": "address"
-                        }
-                    ],
-                    "name": "setContractOwner",
-                    "outputs": [],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "value",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "setNumberOfAllTokens",
-                    "outputs": [],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "value",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "setTokenPrice",
-                    "outputs": [],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "inputs": [],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "constructor"
-                },
-                {
-                    "payable": true,
-                    "stateMutability": "payable",
-                    "type": "fallback"
-                }
-            ]
-        };
-
-        const contract = web3.eth.contract(config.contractAbi).at(config.contractAddress, (error, contract) => {
-            return contract;
-        });
-
-        let ethAddress = contract._eth.coinbase;
-
+      
         let start = new Vue({
 
             el: '#start',
@@ -439,7 +276,6 @@
 
                 getNumberOfTokens() {
                     if (this.show)
-
                         contract.getNumberOfTokens(this.address, (error, tokens) => {
                             if (!error) {
                                 this.tokens = tokens.toNumber();
@@ -482,21 +318,10 @@
                     let sum = amount * document.getElementById("ethAmount").innerHTML;
                     let etherSum = web3.toWei(sum, 'ether');
 
-                    web3.eth.sendTransaction({
-                        from: wallet.address,
-                        to: contractOwnerAddress,
-                        value: etherSum,
-                        gasLimit: 21000,
-                        gasPrice: 20000000000
-                    }, function (error, result) {
+                    contract.buyTokens(etherSum, amount, function (error, result) {
                         if (!error) {
-
-                            contract.buyTokens(amount, function (error, result) {
-                                if (!error) {
-                                    console.log(result);
-                                } else
-                                    console.log(error);
-                            });
+                            console.log("BUY TOKENS!!");
+                            console.log(result);
 
                             let startDate = (Date.now() / 1000) + (delayDays * 24 * 60 * 60);
 
@@ -521,10 +346,25 @@
                                     }
                                 }
                             };
-                        }
-                        else
-                            console.error(error);
+
+                        } else
+                            console.log(error);
                     });
+
+                    //web3.eth.sendTransaction({
+                    //    from: wallet.address,
+                    //    to: contractOwnerAddress,
+                    //    value: etherSum,
+                    //    gasLimit: 21000,
+                    //    gasPrice: 20000000000
+                    //}, function (error, result) {
+                    //    if (!error) {
+
+
+                    //    }
+                    //    else
+                    //        console.error(error);
+                    //});
                 }
             }
         });
@@ -689,6 +529,191 @@
             }
         });
 
+        if (typeof web3 === 'undefined') {
+            changeView(true, false, false);
+        }
+
+        const config = {
+            contractAddress: '0x9a7DCF2d87280aD581dD9A4C5BdEe3d0f72296CA',
+            contractAbi: [
+                {
+                    "constant": false,
+                    "inputs": [],
+                    "name": "destroyContract",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "getNumberOfSoldTokens",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "getNumberOfAllTokens",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [
+                        {
+                            "name": "_address",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "getNumberOfTokens",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "getContractOwner",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "getTokenPrice",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "setTokenPrice",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "value",
+                            "type": "uint256"
+                        },
+                        {
+                            "name": "amount",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "buyTokens",
+                    "outputs": [],
+                    "payable": true,
+                    "stateMutability": "payable",
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_address",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "setContractOwner",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "setNumberOfAllTokens",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "getNumberOfAvailableTokens",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "constructor"
+                },
+                {
+                    "payable": true,
+                    "stateMutability": "payable",
+                    "type": "fallback"
+                }
+            ]
+        };
+
+        const contract = web3.eth.contract(config.contractAbi).at(config.contractAddress, (error, contract) => {
+            return contract;
+        });
+
+        let ethAddress = contract._eth.coinbase;
+
         let tokenCourse = 0;
         let tokenAmountList = [];
         let startDateList = [];
@@ -700,9 +725,16 @@
         getUserList();
         getEthTransactionList();
         getAddedTokens();
-        //setBitCoinTransaction();
         getBitCoinTransactionList();
-        //getEthereumInfo();
+
+        function getContractOwner() {
+            contract.getContractOwner(function (error, contractOwner) {
+                if (!error) {
+                    contractOwnerAddress = contractOwner;
+                } else
+                    console.log(error);
+            });
+        }
 
         function getDelayDays() {
             let xmlHttpRequest = XMLHTTPRequestAsync("php/getDelayDays.php");
@@ -746,8 +778,10 @@
                             cell2.innerHTML = userDataList[2];
                             cell3.innerHTML = userDataList[3];
                             ethAddressList.push(userDataList[3]);
+                            console.log(userDataList[3]);
                             contract.getNumberOfTokens(userDataList[3], (error, tokens) => {
                                 if (!error) {
+                                    console.log(tokens.toNumber());
                                     cell4.innerHTML = tokens.toNumber();
                                 } else
                                     console.log(error);
@@ -855,6 +889,7 @@
             xmlHttpRequest.onload = function () {
                 if (xmlHttpRequest.readyState === 4) {
                     if (xmlHttpRequest.status === 200) {
+                        console.log("KURWA CO JEST");
                         console.log(xmlHttpRequest.responseText);
                     }
                 }
@@ -989,15 +1024,6 @@
                     document.getElementById("userList").style.visibility =
                     document.getElementById("ethTransactionList").style.visibility = "hidden";
             }
-        }
-
-        function getContractOwner() {
-            contract.getContractOwner(function (error, contractOwner) {
-                if (!error) {
-                    contractOwnerAddress = contractOwner;
-                } else
-                    console.log(error);
-            });
         }
 
     </script>

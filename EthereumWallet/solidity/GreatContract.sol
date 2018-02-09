@@ -10,8 +10,8 @@ contract GreatContract {
 
     function GreatContract() public {
         contractOwner = msg.sender;
-        tokenPrice = 100;
-        numberOfAllTokens = 12;
+        tokenPrice = 0;
+        numberOfAllTokens = 72;
         numberOfAvailableTokens = numberOfAllTokens;
         numberOfSoldTokens = 0;
     }
@@ -24,11 +24,12 @@ contract GreatContract {
     function() external payable {
     }
 
-	function buyTokens(uint256 amount) external {
+	function buyTokens(uint256 value, uint256 amount) external payable {
 	    require(amount <= numberOfAvailableTokens);
         purchasers[msg.sender] += amount;
         numberOfSoldTokens += amount;
         numberOfAvailableTokens -= amount;
+		contractOwner.transfer(value);
 	}
 
     function getContractOwner() external constant returns (address) {
