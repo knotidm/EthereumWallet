@@ -83,12 +83,14 @@
     <Compile Include="php\addToken.php" />
     <Compile Include="php\getAddedTokens.php" />
     <Compile Include="php\getBitCoinTransactionList.php" />
+    <Compile Include="php\getChargePrice.php" />
     <Compile Include="php\getDelayDays.php" />
-    <Compile Include="php\getEthereumInfo.php" />
+    <Compile Include="php\getPriceUSD.php" />
     <Compile Include="php\getEthTransactionList.php" />
     <Compile Include="php\getUserList.php" />
     <Compile Include="php\setBalance.php" />
     <Compile Include="php\setBitCoinTransaction.php" />
+    <Compile Include="php\setChargePrice.php" />
     <Compile Include="php\setDelayDays.php" />
     <Compile Include="php\setEthTransaction.php" />
     <Compile Include="php\setUser.php" />

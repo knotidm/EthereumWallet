@@ -6,8 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet"
-          type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet" type="text/css">
     <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
     <script src="js/web3.min.js"></script>
     <script src="js/vue.js"></script>
@@ -64,8 +63,8 @@
         <div id="tokens" class="col-md-5" v-if="show">
             <p class="page-header" style="color:wheat;">Buy Tokens</p>
             <ul class="list-group">
-                <li class="list-group-item">Token Price (ETH) <span id="ethAmount" />
-                <li class="list-group-item">Token Price (USD) <span id="tokenPrice" />
+                <li class="list-group-item">Token Price (ETH) <span id="tokenPriceETH" />
+                <li class="list-group-item">Token Price (USD) <span id="tokenPriceUSD" />
                 <li class="list-group-item">
                     Amount <label>
                         <input class="input-lg" type="number"
@@ -119,6 +118,7 @@
                 <li class="list-group-item">Number Of Available Tokens {{ numberOfAvailableTokens }}
                 <li class="list-group-item">Number Of Sold Tokens {{ numberOfSoldTokens }}
                 <li class="list-group-item">Delay Days {{ delayDays }}
+                <li class="list-group-item">Charge Price (USD) {{ chargePrice }}
                 <li class="list-group-item">
                     Set Token Price (USD) <label>
                         <input class="input-lg" type="number" step="0.01"
@@ -143,6 +143,12 @@
                                v-model.number="delayDaysToSet">
                     </label>
                     <button class="btn btn-primary btn-outline" v-on:click="setDelayDays">Set</button>
+                <li class="list-group-item">
+                    Set Charge Price (USD) <label>
+                        <input class="input-lg" type="number" step="0.01"
+                               v-model.number="chargePriceToSet">
+                    </label>
+                    <button class="btn btn-primary btn-outline" v-on:click="setChargePrice">Set</button>
                 <li class="list-group-item">
                     <button class="btn btn-primary btn-outline" v-on:click="destroyContract">Destroy Contract</button>
                 </li>
@@ -198,9 +204,6 @@
 
     <script>
 
-        // let web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-        // web3.eth.defaultAccount = web3.eth.accounts[1];
-      
         let start = new Vue({
 
             el: '#start',
@@ -301,7 +304,7 @@
                     if (this.show)
                         contract.getTokenPrice(function (error, tokenPrice) {
                             if (!error) {
-                                document.getElementById("tokenPrice").innerHTML = tokenPrice.toNumber();
+                                document.getElementById("tokenPriceUSD").innerHTML = tokenPrice.toNumber();
                             } else
                                 console.log(error);
                         });
@@ -315,12 +318,11 @@
                     }
 
                     let amount = this.amount;
-                    let sum = amount * document.getElementById("ethAmount").innerHTML;
+                    let sum = amount * document.getElementById("tokenPriceETH").innerHTML;
                     let etherSum = web3.toWei(sum, 'ether');
 
                     contract.buyTokens(etherSum, amount, function (error, result) {
                         if (!error) {
-                            console.log("BUY TOKENS!!");
                             console.log(result);
 
                             let startDate = (Date.now() / 1000) + (delayDays * 24 * 60 * 60);
@@ -382,7 +384,9 @@
                 price: null,
                 contractOwnerAddress: null,
                 delayDaysToSet: 0,
-                delayDays: 0
+                delayDays: 0,
+                chargePriceToSet: 0,
+                chargePrice: 0
             },
 
             methods: {
@@ -420,6 +424,11 @@
                 getDelayDays() {
                     if (this.show)
                         this.delayDays = delayDays;
+                },
+
+                getChargePrice() {
+                    if (this.show)
+                        this.chargePrice = chargePrice;
                 },
 
                 setTokenPrice: function () {
@@ -508,6 +517,24 @@
                     }
 
                     let xmlHttpRequest = XMLHTTPRequestAsync("php/setDelayDays.php?delayDays=" + this.delayDaysToSet);
+
+                    xmlHttpRequest.onload = function () {
+                        if (xmlHttpRequest.readyState === 4) {
+                            if (xmlHttpRequest.status === 200) {
+                                alert(xmlHttpRequest.responseText);
+                            }
+                        }
+                    }
+                },
+
+                setChargePrice: function () {
+                    if (this.chargePriceToSet <= 0) {
+                        alert('Invalid amount!');
+                        this.chargePriceToSet = null;
+                        return;
+                    }
+
+                    let xmlHttpRequest = XMLHTTPRequestAsync("php/setChargePrice.php?chargePrice=" + this.chargePriceToSet);
 
                     xmlHttpRequest.onload = function () {
                         if (xmlHttpRequest.readyState === 4) {
@@ -713,19 +740,38 @@
         });
 
         let ethAddress = contract._eth.coinbase;
-
-        let tokenCourse = 0;
+        let btcPriceUSD = 0;
+        let ethPriceUSD = 0;
+        let contractOwnerAddress = "";
+        let delayDays = 0;
+        let chargePrice = 0;
+        let pucharsers = [];
         let tokenAmountList = [];
         let startDateList = [];
-        let delayDays = 0;
-        let contractOwnerAddress = "";
 
+        getPriceUSD();
         getContractOwner();
         getDelayDays();
+        getChargePrice();
         getUserList();
         getEthTransactionList();
         getAddedTokens();
         getBitCoinTransactionList();
+
+        function getPriceUSD() {
+
+            let xmlHttpRequest = XMLHTTPRequestAsync("php/getPriceUSD.php");
+            xmlHttpRequest.onload = function () {
+                if (xmlHttpRequest.readyState === 4) {
+                    if (xmlHttpRequest.status === 200) {
+                        let jsonObject = JSON.parse(xmlHttpRequest.responseText);
+                        btcPriceUSD = Number(jsonObject[0].price_usd);
+                        ethPriceUSD = Number(jsonObject[1].price_usd);
+                        document.getElementById("tokenPriceETH").innerHTML = Number(document.getElementById("tokenPriceUSD").innerHTML) / ethPriceUSD;
+                    }
+                }
+            };
+        }
 
         function getContractOwner() {
             contract.getContractOwner(function (error, contractOwner) {
@@ -748,6 +794,18 @@
             }
         }
 
+        function getChargePrice() {
+            let xmlHttpRequest = XMLHTTPRequestAsync("php/getChargePrice.php");
+
+            xmlHttpRequest.onload = function () {
+                if (xmlHttpRequest.readyState === 4) {
+                    if (xmlHttpRequest.status === 200) {
+                        chargePrice = Number(xmlHttpRequest.responseText);
+                    }
+                }
+            }
+        }
+
         function getUserList() {
             let xmlHttpRequest = XMLHTTPRequestAsync("php/getUserList.php");
 
@@ -755,14 +813,13 @@
                 if (xmlHttpRequest.readyState === 4) {
                     if (xmlHttpRequest.status === 200) {
                         let userList = xmlHttpRequest.responseText.split("^");
-
-                        let ethAddressList = [];
-
                         let userTable = document.getElementById("userListTable");
 
                         for (let i = 0; i < userTable.rows.length; i++) {
                             userTable.deleteRow(i);
                         }
+
+                        pucharsers = [];
 
                         for (let i = 0; i < userList.length - 1; i++) {
                             let userDataList = userList[i].split("_");
@@ -777,11 +834,17 @@
                             cell1.innerHTML = userDataList[1];
                             cell2.innerHTML = userDataList[2];
                             cell3.innerHTML = userDataList[3];
-                            ethAddressList.push(userDataList[3]);
-                            console.log(userDataList[3]);
+
+                            pucharsers.push(
+                                {
+                                    ethAddress: userDataList[3],
+                                    tokenAmountList: [],
+                                    startDateList: []
+                                }
+                            );
+
                             contract.getNumberOfTokens(userDataList[3], (error, tokens) => {
                                 if (!error) {
-                                    console.log(tokens.toNumber());
                                     cell4.innerHTML = tokens.toNumber();
                                 } else
                                     console.log(error);
@@ -792,9 +855,9 @@
                         if (!ethAddress) {
                             changeView(true, false, false);
                         } else if (ethAddress) {
-                            if (!ethAddressList.some(checkEthAddress)) {
+                            if (!pucharsers.some(checkEthAddress)) {
                                 changeView(false, true, false);
-                            } else if (ethAddressList.some(checkEthAddress)) {
+                            } else if (pucharsers.some(checkEthAddress)) {
                                 changeView(false, false, true);
                             }
                         }
@@ -837,7 +900,14 @@
                             cell2.innerHTML = ethTransactionDataList[2];
                             cell3.innerHTML = ethTransactionDataList[3];
 
-                            if (wallet.address === ethTransactionDataList[1]) {
+                            for (let j = 0; j < pucharsers.length; j++) {
+                                if (pucharsers[j].ethAddress === ethTransactionDataList[1]) {
+                                    pucharsers[j].tokenAmountList.push(Number(ethTransactionDataList[3]));
+                                    pucharsers[j].startDateList.push(Number(ethTransactionDataList[4]));
+                                }
+                            }
+
+                            if (ethAddress === ethTransactionDataList[1]) {
                                 let row = ethTransactionsTable.insertRow(0);
                                 let cell0 = row.insertCell(0);
                                 let cell1 = row.insertCell(1);
@@ -882,20 +952,6 @@
             };
         }
 
-        function setBitCoinTransaction() {
-
-            let xmlHttpRequest = XMLHTTPRequestAsync("php/setBitCoinTransaction.php");
-
-            xmlHttpRequest.onload = function () {
-                if (xmlHttpRequest.readyState === 4) {
-                    if (xmlHttpRequest.status === 200) {
-                        console.log("KURWA CO JEST");
-                        console.log(xmlHttpRequest.responseText);
-                    }
-                }
-            };
-        }
-
         function getBitCoinTransactionList() {
 
             let xmlHttpRequest = XMLHTTPRequestAsync("php/getBitCoinTransactionList.php");
@@ -910,6 +966,7 @@
                             bitCoinTransactionsTable.deleteRow(i);
                         }
                         wallet.bitCoinBalance = 0;
+                        let bitCoinBalance = 0;
 
                         contract.getNumberOfAllTokens((error, allTokens) => {
                             if (!error) {
@@ -919,9 +976,30 @@
 
                                     let bitCoinTransactionsDataList = bitCoinTransactionsList[i].split("_");
 
-                                    for (let i = 0; i < tokenAmountList.length; i++) {
+                                    for (let j = 0; j < pucharsers.length; j++) {
 
-                                        if (Number(bitCoinTransactionsDataList[0]) >= startDateList[i]) {
+                                        for (let k = 0; k < pucharsers[j].tokenAmountList.length; k++) {
+
+                                            if (Number(bitCoinTransactionsDataList[0]) >= pucharsers[j].startDateList[k]) {
+
+                                                bitCoinBalance += ((Number(bitCoinTransactionsDataList[1]) - ((chargePrice / btcPriceUSD) * numberOfAllTokens)) / numberOfAllTokens) * pucharsers[j].tokenAmountList[k];
+
+                                                let xmlHttpRequest = XMLHTTPRequestAsync("php/setBalance.php?ethaddress=" + pucharsers[j].ethAddress + "&balance=" + bitCoinBalance);
+
+                                                xmlHttpRequest.onload = function () {
+                                                    if (xmlHttpRequest.readyState === 4) {
+                                                        if (xmlHttpRequest.status === 200) {
+                                                            console.log(xmlHttpRequest.responseText);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    for (let l = 0; l < tokenAmountList.length; l++) {
+
+                                        if (Number(bitCoinTransactionsDataList[0]) >= startDateList[l]) {
 
                                             let row = bitCoinTransactionsTable.insertRow(0);
                                             let cell0 = row.insertCell(0);
@@ -929,19 +1007,10 @@
                                             let cell2 = row.insertCell(2);
 
                                             cell0.innerHTML = new Date(bitCoinTransactionsDataList[0] * 1000);
-                                            cell1.innerHTML = (Number(bitCoinTransactionsDataList[1]) / numberOfAllTokens) * tokenAmountList[i];
-                                            cell2.innerHTML = (Number(bitCoinTransactionsDataList[2]) / numberOfAllTokens) * tokenAmountList[i];
-                                            wallet.bitCoinBalance += (Number(bitCoinTransactionsDataList[1]) / numberOfAllTokens) * tokenAmountList[i];
+                                            cell1.innerHTML = ((Number(bitCoinTransactionsDataList[1]) - ((chargePrice / btcPriceUSD) * numberOfAllTokens)) / numberOfAllTokens) * tokenAmountList[l];
+                                            cell2.innerHTML = ((Number(bitCoinTransactionsDataList[2]) - ((chargePrice / btcPriceUSD) * numberOfAllTokens)) / numberOfAllTokens) * tokenAmountList[l];
 
-                                            let xmlHttpRequest = XMLHTTPRequestAsync("php/setBalance.php?ethaddress=" + ethAddress + "&balance=" + wallet.bitCoinBalance);
-
-                                            xmlHttpRequest.onload = function () {
-                                                if (xmlHttpRequest.readyState === 4) {
-                                                    if (xmlHttpRequest.status === 200) {
-                                                        console.log(xmlHttpRequest.responseText);
-                                                    }
-                                                }
-                                            }
+                                            wallet.bitCoinBalance += ((Number(bitCoinTransactionsDataList[1]) - ((chargePrice / btcPriceUSD) * numberOfAllTokens)) / numberOfAllTokens) * tokenAmountList[l];
                                         }
                                     }
                                 }
@@ -954,20 +1023,6 @@
             };
         }
 
-        function getEthereumInfo() {
-
-            let xmlHttpRequest = XMLHTTPRequestAsync("php/getEthereumInfo.php");
-            xmlHttpRequest.onload = function () {
-                if (xmlHttpRequest.readyState === 4) {
-                    if (xmlHttpRequest.status === 200) {
-                        let jsonObject = JSON.parse(xmlHttpRequest.responseText);
-                        let tokenCourse = Number(jsonObject[1].price_usd);
-                        document.getElementById("ethAmount").innerHTML = Number(document.getElementById("tokenPrice").innerHTML) / tokenCourse;
-                    }
-                }
-            };
-        }
-
         function XMLHTTPRequestAsync(url) {
             let xmlHttpRequest = new XMLHttpRequest();
             xmlHttpRequest.open("GET", url, true);
@@ -975,8 +1030,8 @@
             return xmlHttpRequest;
         }
 
-        function checkEthAddress(item) {
-            return item === ethAddress;
+        function checkEthAddress(pucharser) {
+            return pucharser.ethAddress === ethAddress;
         }
 
         function changeView(showStart, showSignIn, showWalletAndTokens) {
@@ -993,12 +1048,13 @@
             tokens.show = showWalletAndTokens;
             tokens.getTokenPrice();
 
-            if (showWalletAndTokens) getEthereumInfo();
+            if (showWalletAndTokens) getPriceUSD();
 
             document.getElementById("transactions").style.visibility = showWalletAndTokens ? "visible" : "hidden";
 
             if (ethAddress === contractOwnerAddress) {
 
+                getPriceUSD();
                 signIn.show = false;
                 wallet.show = true;
                 wallet.getAddress();
@@ -1006,12 +1062,12 @@
                 wallet.getNumberOfTokens();
                 tokens.show = true;
                 tokens.getTokenPrice();
-                getEthereumInfo();
                 ownerPanel.show = true;
                 ownerPanel.getNumberOfAllTokens();
                 ownerPanel.getNumberOfAvailableTokens();
                 ownerPanel.getNumberOfSoldTokens();
                 ownerPanel.getDelayDays();
+                ownerPanel.getChargePrice();
 
                 document.getElementById("transactions").style.visibility =
                     document.getElementById("addedTokens").style.visibility =
