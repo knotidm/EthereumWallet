@@ -1,9 +1,8 @@
 <?php
 
-if (isset($_GET['firstname'])) $firstname = $_GET['firstname'];
-if (isset($_GET['lastname'])) $lastname = $_GET['lastname'];
-if (isset($_GET['email'])) $email = $_GET['email'];
 if (isset($_GET['ethaddress'])) $ethaddress = $_GET['ethaddress'];
+if (isset($_GET['unpaid'])) $unpaid = $_GET['unpaid'];
+if (isset($_GET['paid'])) $paid = $_GET['paid'];
 
 $host = "coinwallet.c26ysish9yud.eu-west-3.rds.amazonaws.com";
 $username = "coinwallet";
@@ -16,8 +15,12 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "INSERT INTO coinwallet.user (firstname, lastname, email, ethaddress, balance, unpaid, paid)
-VALUES ('$firstname', '$lastname', '$email', '$ethaddress', '0', '0', '0')";
+$unpaidFloat = floatval($unpaid);
+$paidFloat = floatval($paid);
+$valueToPayFloat = $unpaidFloat + $paidFloat;
+$valueToPayString = strval($valueToPayFloat);
+
+$sql = "UPDATE coinwallet.user SET unpaid='0', paid='$valueToPayString' WHERE ethaddress='$ethaddress'";
 
 if ($conn->query($sql) === TRUE) {
     echo "New record created successfully";

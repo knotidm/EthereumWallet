@@ -16,7 +16,7 @@ $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        echo $row["firstname"] . "_" . $row["lastname"] . "_" . $row["email"] . "_" . $row["ethaddress"] . "_" . $row["balance"] . "^";
+        echo $row["firstname"] . "_" . $row["lastname"] . "_" . $row["email"] . "_" . $row["ethaddress"] . "_" . $row["balance"] . "_" . $row["unpaid"] . "_" . $row["paid"] . "^";
     }
 } else {
     echo "0 results";

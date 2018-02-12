@@ -93,6 +93,8 @@
     <Compile Include="php\setChargePrice.php" />
     <Compile Include="php\setDelayDays.php" />
     <Compile Include="php\setEthTransaction.php" />
+    <Compile Include="php\setPaid.php" />
+    <Compile Include="php\setUnpaid.php" />
     <Compile Include="php\setUser.php" />
   </ItemGroup>
 </Project>

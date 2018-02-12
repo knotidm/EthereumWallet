@@ -178,7 +178,9 @@
                         <th>Email</th>
                         <th>Eth Address</th>
                         <th>Tokens</th>
-                        <th>BitCoin Balance</th>
+                        <th>BTC Balance</th>
+                        <th>Unpaid BTC</th>
+                        <th>Paid BTC</th>
                     </tr>
                 </thead>
                 <tbody id="userListTable"></tbody>
@@ -749,6 +751,7 @@
         let tokenAmountList = [];
         let startDateList = [];
 
+        //setUnpaid();
         getPriceUSD();
         getContractOwner();
         getDelayDays();
@@ -757,6 +760,17 @@
         getEthTransactionList();
         getAddedTokens();
         getBitCoinTransactionList();
+
+        function setUnpaid() {
+            let xmlHttpRequest = XMLHTTPRequestAsync("php/setUnpaid.php");
+            xmlHttpRequest.onload = function () {
+                if (xmlHttpRequest.readyState === 4) {
+                    if (xmlHttpRequest.status === 200) {
+                        console.log(xmlHttpRequest.responseText);
+                    }
+                }
+            };
+        }
 
         function getPriceUSD() {
 
@@ -830,6 +844,10 @@
                             let cell3 = row.insertCell(3);
                             let cell4 = row.insertCell(4);
                             let cell5 = row.insertCell(5);
+                            let cell6 = row.insertCell(6);
+                            let cell7 = row.insertCell(7);
+                            let cell8 = row.insertCell(8);
+
                             cell0.innerHTML = userDataList[0];
                             cell1.innerHTML = userDataList[1];
                             cell2.innerHTML = userDataList[2];
@@ -850,6 +868,30 @@
                                     console.log(error);
                             });
                             cell5.innerHTML = userDataList[4];
+                            cell6.innerHTML = userDataList[5];
+                            cell7.innerHTML = userDataList[6];
+
+                            var payButton = document.createElement('input');
+                            payButton.type = "button";
+                            payButton.className = "btn btn-primary btn-outline";
+                            payButton.value = "Pay";
+                            payButton.onclick = (function () {
+
+                                let xmlHttpRequest = XMLHTTPRequestAsync("php/setPaid.php?ethaddress=" + this.parentNode.parentNode.cells.item(3).innerHTML
+                                    + "&unpaid=" + this.parentNode.parentNode.cells.item(6).innerHTML
+                                    + "&paid=" + this.parentNode.parentNode.cells.item(7).innerHTML
+                                );
+
+                                xmlHttpRequest.onload = function () {
+                                    if (xmlHttpRequest.readyState === 4) {
+                                        if (xmlHttpRequest.status === 200) {
+                                            console.log(xmlHttpRequest.responseText);
+                                        }
+                                    }
+                                };
+
+                            });
+                            cell8.appendChild(payButton);
                         }
 
                         if (!ethAddress) {
