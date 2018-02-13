@@ -477,6 +477,16 @@
                                 }
                             };
 
+                            let xmlHttpRequest2 = XMLHTTPRequestAsync("php/setNumberOfAllTokens.php?numberOfAllTokens=" + amountTemp);
+
+                            xmlHttpRequest2.onload = function () {
+                                if (xmlHttpRequest2.readyState === 4) {
+                                    if (xmlHttpRequest2.status === 200) {
+                                        alert(xmlHttpRequest2.responseText);
+                                    }
+                                }
+                            }
+
                             console.log(result);
                             this.getNumberOfAllTokens();
                             this.getNumberOfAvailableTokens();
@@ -488,12 +498,14 @@
                 },
 
                 refresh: function () {
-                    tokens.getTokenPrice();
-                    getEthereumInfo();
+                    getPriceUSD();
+                    tokens.getTokenPrice();                   
                     // this.getContractOwnerAddress();
                     this.getNumberOfAllTokens();
                     this.getNumberOfAvailableTokens();
                     this.getNumberOfSoldTokens();
+                    this.getDelayDays();
+                    this.getChargePrice();
                 },
 
                 setContractOwner: function () {
@@ -781,7 +793,11 @@
                         let jsonObject = JSON.parse(xmlHttpRequest.responseText);
                         btcPriceUSD = Number(jsonObject[0].price_usd);
                         ethPriceUSD = Number(jsonObject[1].price_usd);
-                        document.getElementById("tokenPriceETH").innerHTML = Number(document.getElementById("tokenPriceUSD").innerHTML) / ethPriceUSD;
+                        console.log(btcPriceUSD);
+                        console.log(ethPriceUSD);
+                        if (document.getElementById("tokenPriceUSD")) {                      
+                            document.getElementById("tokenPriceETH").innerHTML = Number(document.getElementById("tokenPriceUSD").innerHTML) / ethPriceUSD;
+                        }
                     }
                 }
             };
@@ -791,6 +807,7 @@
             contract.getContractOwner(function (error, contractOwner) {
                 if (!error) {
                     contractOwnerAddress = contractOwner;
+                    console.log(contractOwnerAddress);
                 } else
                     console.log(error);
             });
@@ -803,6 +820,7 @@
                 if (xmlHttpRequest.readyState === 4) {
                     if (xmlHttpRequest.status === 200) {
                         delayDays = Number(xmlHttpRequest.responseText);
+                        console.log(delayDays);
                     }
                 }
             }
@@ -815,6 +833,7 @@
                 if (xmlHttpRequest.readyState === 4) {
                     if (xmlHttpRequest.status === 200) {
                         chargePrice = Number(xmlHttpRequest.responseText);
+                        console.log(chargePrice);
                     }
                 }
             }
@@ -1024,7 +1043,7 @@
 
                                             if (Number(bitCoinTransactionsDataList[0]) >= pucharsers[j].startDateList[k]) {
 
-                                                bitCoinBalance += ((Number(bitCoinTransactionsDataList[1]) - ((chargePrice / btcPriceUSD) * numberOfAllTokens)) / numberOfAllTokens) * pucharsers[j].tokenAmountList[k];
+                                                bitCoinBalance += ((Number(bitCoinTransactionsDataList[1]) - Number(bitCoinTransactionsDataList[3])) / numberOfAllTokens) * pucharsers[j].tokenAmountList[k];
 
                                                 let xmlHttpRequest = XMLHTTPRequestAsync("php/setBalance.php?ethaddress=" + pucharsers[j].ethAddress + "&balance=" + bitCoinBalance);
 
@@ -1049,10 +1068,10 @@
                                             let cell2 = row.insertCell(2);
 
                                             cell0.innerHTML = new Date(bitCoinTransactionsDataList[0] * 1000);
-                                            cell1.innerHTML = ((Number(bitCoinTransactionsDataList[1]) - ((chargePrice / btcPriceUSD) * numberOfAllTokens)) / numberOfAllTokens) * tokenAmountList[l];
-                                            cell2.innerHTML = ((Number(bitCoinTransactionsDataList[2]) - ((chargePrice / btcPriceUSD) * numberOfAllTokens)) / numberOfAllTokens) * tokenAmountList[l];
+                                            cell1.innerHTML = ((Number(bitCoinTransactionsDataList[1]) - Number(bitCoinTransactionsDataList[3])) / numberOfAllTokens) * tokenAmountList[l];
+                                            cell2.innerHTML = (Number(bitCoinTransactionsDataList[2]) / numberOfAllTokens) * tokenAmountList[l];
 
-                                            wallet.bitCoinBalance += ((Number(bitCoinTransactionsDataList[1]) - ((chargePrice / btcPriceUSD) * numberOfAllTokens)) / numberOfAllTokens) * tokenAmountList[l];
+                                            wallet.bitCoinBalance += ((Number(bitCoinTransactionsDataList[1]) - Number(bitCoinTransactionsDataList[3])) / numberOfAllTokens) * tokenAmountList[l];
                                         }
                                     }
                                 }
