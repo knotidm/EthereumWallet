@@ -279,6 +279,18 @@
                         })
                 },
 
+                getBitCoinBalance() {
+                    let xmlHttpRequest = XMLHTTPRequestAsync("php/getBalance.php?ethAddress=" + ethAddress);
+
+                    xmlHttpRequest.onload = function () {
+                        if (xmlHttpRequest.readyState === 4) {
+                            if (xmlHttpRequest.status === 200) {
+                                console.log(chargePrice);
+                            }
+                        }
+                    }
+                },
+
                 getNumberOfTokens() {
                     if (this.show)
                         contract.getNumberOfTokens(this.address, (error, tokens) => {
@@ -499,7 +511,7 @@
 
                 refresh: function () {
                     getPriceUSD();
-                    tokens.getTokenPrice();                   
+                    tokens.getTokenPrice();
                     // this.getContractOwnerAddress();
                     this.getNumberOfAllTokens();
                     this.getNumberOfAvailableTokens();
@@ -795,7 +807,7 @@
                         ethPriceUSD = Number(jsonObject[1].price_usd);
                         console.log(btcPriceUSD);
                         console.log(ethPriceUSD);
-                        if (document.getElementById("tokenPriceUSD")) {                      
+                        if (document.getElementById("tokenPriceUSD")) {
                             document.getElementById("tokenPriceETH").innerHTML = Number(document.getElementById("tokenPriceUSD").innerHTML) / ethPriceUSD;
                         }
                     }
@@ -961,13 +973,6 @@
                             cell2.innerHTML = ethTransactionDataList[2];
                             cell3.innerHTML = ethTransactionDataList[3];
 
-                            for (let j = 0; j < pucharsers.length; j++) {
-                                if (pucharsers[j].ethAddress === ethTransactionDataList[1]) {
-                                    pucharsers[j].tokenAmountList.push(Number(ethTransactionDataList[3]));
-                                    pucharsers[j].startDateList.push(Number(ethTransactionDataList[4]));
-                                }
-                            }
-
                             if (ethAddress === ethTransactionDataList[1]) {
                                 let row = ethTransactionsTable.insertRow(0);
                                 let cell0 = row.insertCell(0);
@@ -1026,8 +1031,6 @@
                         for (let i = 0; i < bitCoinTransactionsTable.rows.length; i++) {
                             bitCoinTransactionsTable.deleteRow(i);
                         }
-                        wallet.bitCoinBalance = 0;
-                        let bitCoinBalance = 0;
 
                         contract.getNumberOfAllTokens((error, allTokens) => {
                             if (!error) {
@@ -1036,27 +1039,6 @@
                                 for (let i = 0; i < bitCoinTransactionsList.length - 1; i++) {
 
                                     let bitCoinTransactionsDataList = bitCoinTransactionsList[i].split("_");
-
-                                    for (let j = 0; j < pucharsers.length; j++) {
-
-                                        for (let k = 0; k < pucharsers[j].tokenAmountList.length; k++) {
-
-                                            if (Number(bitCoinTransactionsDataList[0]) >= pucharsers[j].startDateList[k]) {
-
-                                                bitCoinBalance += ((Number(bitCoinTransactionsDataList[1]) - Number(bitCoinTransactionsDataList[3])) / numberOfAllTokens) * pucharsers[j].tokenAmountList[k];
-
-                                                let xmlHttpRequest = XMLHTTPRequestAsync("php/setBalance.php?ethaddress=" + pucharsers[j].ethAddress + "&balance=" + bitCoinBalance);
-
-                                                xmlHttpRequest.onload = function () {
-                                                    if (xmlHttpRequest.readyState === 4) {
-                                                        if (xmlHttpRequest.status === 200) {
-                                                            console.log(xmlHttpRequest.responseText);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
 
                                     for (let l = 0; l < tokenAmountList.length; l++) {
 
@@ -1069,9 +1051,7 @@
 
                                             cell0.innerHTML = new Date(bitCoinTransactionsDataList[0] * 1000);
                                             cell1.innerHTML = ((Number(bitCoinTransactionsDataList[1]) - Number(bitCoinTransactionsDataList[3])) / numberOfAllTokens) * tokenAmountList[l];
-                                            cell2.innerHTML = (Number(bitCoinTransactionsDataList[2]) / numberOfAllTokens) * tokenAmountList[l];
-
-                                            wallet.bitCoinBalance += ((Number(bitCoinTransactionsDataList[1]) - Number(bitCoinTransactionsDataList[3])) / numberOfAllTokens) * tokenAmountList[l];
+                                            cell2.innerHTML = (Number(bitCoinTransactionsDataList[2]) / numberOfAllTokens) * tokenAmountList[l];                                       
                                         }
                                     }
                                 }
@@ -1104,6 +1084,7 @@
             wallet.show = showWalletAndTokens;
             wallet.getAddress();
             wallet.getEtherBalance();
+            wallet.getBitCoinBalance();
             wallet.getNumberOfTokens();
 
             tokens.show = showWalletAndTokens;
@@ -1120,6 +1101,7 @@
                 wallet.show = true;
                 wallet.getAddress();
                 wallet.getEtherBalance();
+                wallet.getBitCoinBalance();
                 wallet.getNumberOfTokens();
                 tokens.show = true;
                 tokens.getTokenPrice();

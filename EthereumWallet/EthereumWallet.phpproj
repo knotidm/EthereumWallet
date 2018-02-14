@@ -82,6 +82,7 @@
   <ItemGroup>
     <Compile Include="php\addToken.php" />
     <Compile Include="php\getAddedTokens.php" />
+    <Compile Include="php\getBalance.php" />
     <Compile Include="php\getBitCoinTransactionList.php" />
     <Compile Include="php\getChargePrice.php" />
     <Compile Include="php\getDelayDays.php" />
