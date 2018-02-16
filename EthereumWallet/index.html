@@ -44,6 +44,11 @@
             <br>
             <input class="input-lg" type="email" placeholder="example@gmail.com" maxlength="100" v-model="email">
         </h4>
+        <h4>
+            <label>BTC Address</label>
+            <br>
+            <input class="input-lg" type="text" placeholder="" maxlength="100" v-model="btcaddress">
+        </h4>
         <button class="btn btn-primary btn-outline" v-on:click="signIn">Sign In</button>
     </div>
 
@@ -176,7 +181,8 @@
                         <th>First Name</th>
                         <th>Last Name</th>
                         <th>Email</th>
-                        <th>Eth Address</th>
+                        <th>ETH Address</th>
+                        <th>BTC Address</th>
                         <th>Tokens</th>
                         <th>BTC Balance</th>
                         <th>Unpaid BTC</th>
@@ -224,7 +230,8 @@
                 address: null,
                 firstname: null,
                 lastname: null,
-                email: null
+                email: null,
+                btcaddress: null
             },
 
             methods: {
@@ -236,7 +243,7 @@
                 signIn() {
                     let xmlHttpRequest = XMLHTTPRequestAsync("php/setUser.php?firstname="
                         + this.firstname + "&lastname=" + this.lastname + "&email="
-                        + this.email + "&ethaddress=" + this.address);
+                        + this.email + "&ethaddress=" + this.address + "&btcaddress=" + this.btcaddress);
 
                     xmlHttpRequest.onload = function () {
                         if (xmlHttpRequest.readyState === 4) {
@@ -878,11 +885,13 @@
                             let cell6 = row.insertCell(6);
                             let cell7 = row.insertCell(7);
                             let cell8 = row.insertCell(8);
+                            let cell9 = row.insertCell(9);
 
                             cell0.innerHTML = userDataList[0];
                             cell1.innerHTML = userDataList[1];
                             cell2.innerHTML = userDataList[2];
                             cell3.innerHTML = userDataList[3];
+                            cell4.innerHTML = userDataList[7];
 
                             pucharsers.push(
                                 {
@@ -894,13 +903,13 @@
 
                             contract.getNumberOfTokens(userDataList[3], (error, tokens) => {
                                 if (!error) {
-                                    cell4.innerHTML = tokens.toNumber();
+                                    cell5.innerHTML = tokens.toNumber();
                                 } else
                                     console.log(error);
                             });
-                            cell5.innerHTML = userDataList[4];
-                            cell6.innerHTML = userDataList[5];
-                            cell7.innerHTML = userDataList[6];
+                            cell6.innerHTML = userDataList[4];
+                            cell7.innerHTML = userDataList[5];
+                            cell8.innerHTML = userDataList[6];
 
                             var payButton = document.createElement('input');
                             payButton.type = "button";
@@ -916,13 +925,14 @@
                                 xmlHttpRequest.onload = function () {
                                     if (xmlHttpRequest.readyState === 4) {
                                         if (xmlHttpRequest.status === 200) {
+                                            alert("Payment done with success");
                                             console.log(xmlHttpRequest.responseText);
                                         }
                                     }
                                 };
 
                             });
-                            cell8.appendChild(payButton);
+                            cell9.appendChild(payButton);
                         }
 
                         if (!ethAddress) {
