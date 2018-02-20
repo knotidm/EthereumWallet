@@ -88,6 +88,7 @@
     <Compile Include="php\getDelayDays.php" />
     <Compile Include="php\getPriceUSD.php" />
     <Compile Include="php\getEthTransactionList.php" />
+    <Compile Include="php\getTokenAmount.php" />
     <Compile Include="php\getUserList.php" />
     <Compile Include="php\setBalance.php" />
     <Compile Include="php\setBitCoinTransaction.php" />
@@ -96,6 +97,7 @@
     <Compile Include="php\setEthTransaction.php" />
     <Compile Include="php\setNumberOfAllTokens.php" />
     <Compile Include="php\setPaid.php" />
+    <Compile Include="php\setTokenAmount.php" />
     <Compile Include="php\setUnpaid.php" />
     <Compile Include="php\setUser.php" />
   </ItemGroup>

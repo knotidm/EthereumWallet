@@ -54,19 +54,24 @@
 
     <div class="row" style="padding-left: 25px">
         <div id="wallet" class="col-md-5" v-if="show">
-            <p class="page-header" style="color:wheat;">Wallet</p>
+            <p class="page-header" style="color:wheat;">
+                Wallet
+                <button class="btn btn-primary btn-outline" v-on:click="refresh">Refresh</button>
+            </p>
             <ul class="list-group">
                 <li class="list-group-item">Address {{ address }}
                 <li class="list-group-item">Ether Balance {{ etherBalance }}
-                <li class="list-group-item">BitCoin Balance {{ bitCoinBalance }}
-                <li class="list-group-item">
-                    Number Of Tokens {{ tokens }}
+                <li class="list-group-item">BitCoin Balance <p id="bitCoinBalance"></p>
+                <li class="list-group-item">Number Of Tokens <p id="tokens"></p>
                 </li>
             </ul>
         </div>
 
         <div id="tokens" class="col-md-5" v-if="show">
-            <p class="page-header" style="color:wheat;">Buy Tokens</p>
+            <p class="page-header" style="color:wheat;">
+                Buy Tokens
+                <button class="btn btn-primary btn-outline" v-on:click="refresh">Refresh</button>
+            </p>
             <ul class="list-group">
                 <li class="list-group-item">Token Price (ETH) <span id="tokenPriceETH" />
                 <li class="list-group-item">Token Price (USD) <span id="tokenPriceUSD" />
@@ -154,8 +159,8 @@
                                v-model.number="chargePriceToSet">
                     </label>
                     <button class="btn btn-primary btn-outline" v-on:click="setChargePrice">Set</button>
-                <li class="list-group-item">
-                    <button class="btn btn-primary btn-outline" v-on:click="destroyContract">Destroy Contract</button>
+                    <!--<li class="list-group-item">
+                        <button class="btn btn-primary btn-outline" v-on:click="destroyContract">Destroy Contract</button>-->
                 </li>
             </ul>
         </div>
@@ -263,15 +268,14 @@
             data: {
                 show: false,
                 address: "",
-                etherBalance: 0,
-                bitCoinBalance: 0,
-                tokens: 0
+                etherBalance: null,
+                bitCoinBalance: null,
+                tokens: null
             },
 
             methods: {
                 getAddress() {
                     if (this.show)
-                        // this.address = web3.eth.defaultAccount;
                         this.address = ethAddress;
                 },
 
@@ -292,20 +296,29 @@
                     xmlHttpRequest.onload = function () {
                         if (xmlHttpRequest.readyState === 4) {
                             if (xmlHttpRequest.status === 200) {
-                                console.log(chargePrice);
+                                document.getElementById("bitCoinBalance").innerHTML = Number(xmlHttpRequest.responseText);
                             }
                         }
                     }
                 },
 
                 getNumberOfTokens() {
-                    if (this.show)
-                        contract.getNumberOfTokens(this.address, (error, tokens) => {
-                            if (!error) {
-                                this.tokens = tokens.toNumber();
-                            } else
-                                console.log(error);
-                        })
+                    let xmlHttpRequest = XMLHTTPRequestAsync("php/getTokenAmount.php?ethAddress=" + ethAddress);
+
+                    xmlHttpRequest.onload = function () {
+                        if (xmlHttpRequest.readyState === 4) {
+                            if (xmlHttpRequest.status === 200) {
+                                document.getElementById("tokens").innerHTML = Number(xmlHttpRequest.responseText);
+                            }
+                        }
+                    }
+                },
+
+                refresh: function () {
+                    this.getAddress();
+                    this.getEtherBalance();
+                    this.getBitCoinBalance();
+                    this.getNumberOfTokens();
                 }
             }
         });
@@ -331,6 +344,11 @@
                         });
                 },
 
+                refresh: function () {
+                    getPriceUSD();
+                    this.getTokenPrice();
+                },
+
                 buyTokens: function () {
                     if (this.amount <= 0) {
                         alert('Invalid amount!');
@@ -342,7 +360,7 @@
                     let sum = amount * document.getElementById("tokenPriceETH").innerHTML;
                     let etherSum = web3.toWei(sum, 'ether');
 
-                    contract.buyTokens(etherSum, amount, function (error, result) {
+                    contract.buyTokens(amount, function (error, result) {
                         if (!error) {
                             console.log(result);
 
@@ -356,38 +374,38 @@
                                 if (xmlHttpRequest.readyState === 4) {
                                     if (xmlHttpRequest.status === 200) {
                                         console.log(xmlHttpRequest.responseText);
-
-                                        wallet.getEtherBalance();
-                                        wallet.getNumberOfTokens();
-                                        ownerPanel.getNumberOfAllTokens();
-                                        ownerPanel.getNumberOfAvailableTokens();
-                                        ownerPanel.getNumberOfSoldTokens();
-                                        getEthTransactionList();
-                                        getBitCoinTransactionList();
-                                        // getBitCoinInfo();
                                         this.amount = null;
                                     }
                                 }
                             };
 
+                            let xmlHttpRequest1 = XMLHTTPRequestAsync("php/setTokenAmount.php?ethAddress=" + ethAddress + "&tokensToAdd=" + amount);
+
+                            xmlHttpRequest1.onload = function () {
+                                if (xmlHttpRequest1.readyState === 4) {
+                                    if (xmlHttpRequest1.status === 200) {
+                                        console.log(xmlHttpRequest.responseText);
+                                    }
+                                }
+                            }
+
                         } else
                             console.log(error);
                     });
 
-                    //web3.eth.sendTransaction({
-                    //    from: wallet.address,
-                    //    to: contractOwnerAddress,
-                    //    value: etherSum,
-                    //    gasLimit: 21000,
-                    //    gasPrice: 20000000000
-                    //}, function (error, result) {
-                    //    if (!error) {
-
-
-                    //    }
-                    //    else
-                    //        console.error(error);
-                    //});
+                    web3.eth.sendTransaction({
+                        from: wallet.address,
+                        to: contractOwnerAddress,
+                        value: etherSum,
+                        gasLimit: 21000,
+                        gasPrice: 20000000000
+                    }, function (error, result) {
+                        if (!error) {
+                            console.log(result);
+                        }
+                        else
+                            console.error(error);
+                    });
                 }
             }
         });
@@ -578,14 +596,14 @@
                     }
                 },
 
-                destroyContract: function () {
-                    contract.destroyContract((error, result) => {
-                        if (!error) {
-                            console.log(result);
-                        } else
-                            console.log(error);
-                    });
-                }
+                //destroyContract: function () {
+                //    contract.destroyContract((error, result) => {
+                //        if (!error) {
+                //            console.log(result);
+                //        } else
+                //            console.log(error);
+                //    });
+                //}
             }
         });
 
@@ -594,17 +612,8 @@
         }
 
         const config = {
-            contractAddress: '0x9a7DCF2d87280aD581dD9A4C5BdEe3d0f72296CA',
+            contractAddress: '0x3B7e09145118D69dc23c0C2BED7D2E6b88C79359',
             contractAbi: [
-                {
-                    "constant": false,
-                    "inputs": [],
-                    "name": "destroyContract",
-                    "outputs": [],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
                 {
                     "constant": true,
                     "inputs": [],
@@ -620,28 +629,23 @@
                     "type": "function"
                 },
                 {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "getNumberOfAllTokens",
-                    "outputs": [
+                    "constant": false,
+                    "inputs": [
                         {
-                            "name": "",
+                            "name": "amount",
                             "type": "uint256"
                         }
                     ],
+                    "name": "buyTokens",
+                    "outputs": [],
                     "payable": false,
-                    "stateMutability": "view",
+                    "stateMutability": "nonpayable",
                     "type": "function"
                 },
                 {
                     "constant": true,
-                    "inputs": [
-                        {
-                            "name": "_address",
-                            "type": "address"
-                        }
-                    ],
-                    "name": "getNumberOfTokens",
+                    "inputs": [],
+                    "name": "getNumberOfAllTokens",
                     "outputs": [
                         {
                             "name": "",
@@ -692,24 +696,6 @@
                     "outputs": [],
                     "payable": false,
                     "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "value",
-                            "type": "uint256"
-                        },
-                        {
-                            "name": "amount",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "buyTokens",
-                    "outputs": [],
-                    "payable": true,
-                    "stateMutability": "payable",
                     "type": "function"
                 },
                 {
@@ -782,7 +768,6 @@
         let tokenAmountList = [];
         let startDateList = [];
 
-        //setUnpaid();
         getPriceUSD();
         getContractOwner();
         getDelayDays();
@@ -791,17 +776,6 @@
         getEthTransactionList();
         getAddedTokens();
         getBitCoinTransactionList();
-
-        function setUnpaid() {
-            let xmlHttpRequest = XMLHTTPRequestAsync("php/setUnpaid.php");
-            xmlHttpRequest.onload = function () {
-                if (xmlHttpRequest.readyState === 4) {
-                    if (xmlHttpRequest.status === 200) {
-                        console.log(xmlHttpRequest.responseText);
-                    }
-                }
-            };
-        }
 
         function getPriceUSD() {
 
@@ -812,8 +786,6 @@
                         let jsonObject = JSON.parse(xmlHttpRequest.responseText);
                         btcPriceUSD = Number(jsonObject[0].price_usd);
                         ethPriceUSD = Number(jsonObject[1].price_usd);
-                        console.log(btcPriceUSD);
-                        console.log(ethPriceUSD);
                         if (document.getElementById("tokenPriceUSD")) {
                             document.getElementById("tokenPriceETH").innerHTML = Number(document.getElementById("tokenPriceUSD").innerHTML) / ethPriceUSD;
                         }
@@ -826,7 +798,6 @@
             contract.getContractOwner(function (error, contractOwner) {
                 if (!error) {
                     contractOwnerAddress = contractOwner;
-                    console.log(contractOwnerAddress);
                 } else
                     console.log(error);
             });
@@ -839,7 +810,6 @@
                 if (xmlHttpRequest.readyState === 4) {
                     if (xmlHttpRequest.status === 200) {
                         delayDays = Number(xmlHttpRequest.responseText);
-                        console.log(delayDays);
                     }
                 }
             }
@@ -852,7 +822,6 @@
                 if (xmlHttpRequest.readyState === 4) {
                     if (xmlHttpRequest.status === 200) {
                         chargePrice = Number(xmlHttpRequest.responseText);
-                        console.log(chargePrice);
                     }
                 }
             }
@@ -901,12 +870,24 @@
                                 }
                             );
 
-                            contract.getNumberOfTokens(userDataList[3], (error, tokens) => {
-                                if (!error) {
-                                    cell5.innerHTML = tokens.toNumber();
-                                } else
-                                    console.log(error);
-                            });
+                            //contract.getNumberOfTokens(userDataList[3], (error, tokens) => {
+                            //    if (!error) {
+                            //        cell5.innerHTML = tokens.toNumber();
+                            //    } else
+                            //        console.log(error);
+                            //});
+
+                            let xmlHttpRequest = XMLHTTPRequestAsync("php/getTokenAmount.php?ethAddress=" + userDataList[3]);
+
+                            xmlHttpRequest.onload = function () {
+                                if (xmlHttpRequest.readyState === 4) {
+                                    if (xmlHttpRequest.status === 200) {
+                                        cell5.innerHTML = Number(xmlHttpRequest.responseText);
+                                    }
+                                }
+                            }
+
+
                             cell6.innerHTML = userDataList[4];
                             cell7.innerHTML = userDataList[5];
                             cell8.innerHTML = userDataList[6];
@@ -1061,7 +1042,7 @@
 
                                             cell0.innerHTML = new Date(bitCoinTransactionsDataList[0] * 1000);
                                             cell1.innerHTML = ((Number(bitCoinTransactionsDataList[1]) - Number(bitCoinTransactionsDataList[3])) / numberOfAllTokens) * tokenAmountList[l];
-                                            cell2.innerHTML = (Number(bitCoinTransactionsDataList[2]) / numberOfAllTokens) * tokenAmountList[l];                                       
+                                            cell2.innerHTML = (Number(bitCoinTransactionsDataList[2]) / numberOfAllTokens) * tokenAmountList[l];
                                         }
                                     }
                                 }

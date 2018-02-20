@@ -6,14 +6,13 @@ contract GreatContract {
     uint256 private numberOfAllTokens;
     uint256 private numberOfAvailableTokens;
     uint256 private numberOfSoldTokens;
-    mapping(address => uint256) private purchasers;
 
     function GreatContract() public {
         contractOwner = msg.sender;
-        tokenPrice = 0;
+        tokenPrice = 100;
         numberOfAllTokens = 72;
-        numberOfAvailableTokens = numberOfAllTokens;
-        numberOfSoldTokens = 0;
+        numberOfSoldTokens = 14;
+        numberOfAvailableTokens = numberOfAllTokens - numberOfSoldTokens;
     }
 
     modifier OnlyContractOwner {
@@ -24,20 +23,14 @@ contract GreatContract {
     function() external payable {
     }
 
-	function buyTokens(uint256 value, uint256 amount) external payable {
+	function buyTokens(uint256 amount) external {
 	    require(amount <= numberOfAvailableTokens);
-        purchasers[msg.sender] += amount;
         numberOfSoldTokens += amount;
         numberOfAvailableTokens -= amount;
-		contractOwner.transfer(value);
 	}
 
     function getContractOwner() external constant returns (address) {
         return (contractOwner);
-    }
-
-    function getNumberOfTokens(address _address) external constant returns (uint256) {
-        return purchasers[_address];
     }
 
     function getTokenPrice() external constant returns (uint256) {
@@ -68,9 +61,5 @@ contract GreatContract {
 
     function setContractOwner(address _address) external OnlyContractOwner {
         contractOwner = _address;
-    }
-
-    function destroyContract() external OnlyContractOwner {
-        selfdestruct(contractOwner);
     }
 }

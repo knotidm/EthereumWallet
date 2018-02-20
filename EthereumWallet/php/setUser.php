@@ -17,8 +17,8 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "INSERT INTO coinwallet.user (firstname, lastname, email, ethaddress, balance, unpaid, paid, btcaddress)
-VALUES ('$firstname', '$lastname', '$email', '$ethaddress', '0', '0', '0', '$btcaddress')";
+$sql = "INSERT INTO coinwallet.user (firstname, lastname, email, ethaddress, balance, unpaid, paid, btcaddress, tokenamount)
+VALUES ('$firstname', '$lastname', '$email', '$ethaddress', '0', '0', '0', '$btcaddress', '0')";
 
 if ($conn->query($sql) === TRUE) {
     echo "New record created successfully";
