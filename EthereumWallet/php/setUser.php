@@ -23,7 +23,6 @@ function validatebtcaddress($address){
     $d2 = hash("sha256", $d1, true);
 
     if(substr_compare($decoded, $d2, 21, 4)){
-        echo "Bad digest. ";
         return false;
     }
     return true;
@@ -35,7 +34,7 @@ function decodeBase58($input) {
     $out = array_fill(0, 25, 0);
     for($i=0;$i<strlen($input);$i++){
         if(($p=strpos($alphabet, $input[$i]))===false){
-            echo "Invalid character found. ";
+            //echo "Invalid character found. ";
         }
         $c = $p;
         for ($j = 25; $j--; ) {
@@ -45,7 +44,7 @@ function decodeBase58($input) {
             $c = (int)$c;
         }
         if($c != 0){
-            echo "Address too long. ";
+            //echo "Address too long. ";
         }
     }
 
@@ -65,12 +64,15 @@ if ($conn->connect_error) {
 
 $sql = "INSERT INTO coinwallet.user (firstname, lastname, email, ethaddress, balance, unpaid, paid, btcaddress, tokenamount)
 VALUES ('$firstname', '$lastname', '$email', '$ethaddress', '0', '0', '0', '$btcaddress', '0')";
-if (validateemail($email)  && validatebtcaddress($btcaddress)) {
-    if ($conn->query($sql) === TRUE) {
-        echo "Thanks for signing in. Refresh site. ";
-    } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
-    }
-} else echo "Wrong Email Address or BTC Address. ";
+
+if (validateemail($email)) {
+    if ( validatebtcaddress($btcaddress)){
+        if ($conn->query($sql) === TRUE) {
+            echo "Thanks for signing in. Refresh site. ";
+        } else {
+            echo "Error: " . $sql . "<br>" . $conn->error;
+        }
+    } else echo "Wrong BTC Address. ";
+} else echo "Wrong Email Address. ";
 
 $conn->close();
