@@ -11,7 +11,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT * FROM coinwallet.ethtransaction";
+$sql = "SELECT * FROM coinwallet.paymenthistory";
 $result = $conn->query($sql);
 
 $sql1 = "SELECT * FROM coinwallet.user";
@@ -29,13 +29,13 @@ if ($result1->num_rows > 0) {
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-
         for ($i = 0; $i < count($users); $i++) {
             $user = $users[$i];
-            if (strval($user["ethaddress"]) == strval($row["sender"])){
-                echo $row["date"] . "_" . $user["firstname"] . "_" . $user["lastname"] . "_" . $row["sender"] . "_" . $row["ethamount"] . "_" . $row["tokenamount"] . "_" . $row["startdate"] . "_" . $row["ethprice"] . "_" . $row["tokenprice"] . "^";
+            if (strval($user["ethaddress"]) == strval($row["ethaddress"])){
+                echo $row["date"] . "_" . $user["firstname"] . "_" . $user["lastname"] . "_" . $row["ethaddress"] . "_" . $row["btcamount"] . "^";
             }
         }
+
     }
 } else {
     echo "0 results";

@@ -15,7 +15,10 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body style="background-image: url(images/hero_bg.jpg)">
+<body style="background-image: url(images/hero_bg.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: left top; ">
 
     <div id="start" class="container" v-if="show" style="padding-left: 25%; padding-top: 15%">
         <h1>Your MetaMask is locked</h1>
@@ -62,7 +65,8 @@
                 <li class="list-group-item">Address {{ address }}
                 <li class="list-group-item">Ether Balance {{ etherBalance }}
                 <li class="list-group-item">BitCoin Balance <p id="bitCoinBalance"></p>
-                <li class="list-group-item">Number Of Tokens <p id="tokens"></p>
+                <li class="list-group-item">
+                    Number Of Tokens <p id="tokens"></p>
                 </li>
             </ul>
         </div>
@@ -159,8 +163,6 @@
                                v-model.number="chargePriceToSet">
                     </label>
                     <button class="btn btn-primary btn-outline" v-on:click="setChargePrice">Set</button>
-                    <!--<li class="list-group-item">
-                        <button class="btn btn-primary btn-outline" v-on:click="destroyContract">Destroy Contract</button>-->
                 </li>
             </ul>
         </div>
@@ -205,12 +207,34 @@
                 <thead>
                     <tr class="text-info">
                         <th>Date</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
                         <th>Sender</th>
-                        <th>Eth Amount</th>
+                        <th>ETH Amount</th>
                         <th>Token Amount</th>
+                        <th>ETH Price</th>
+                        <th>Token Price</th>
+                        <th>Mining days</th>
                     </tr>
                 </thead>
                 <tbody id="ethTransactionListTable"></tbody>
+            </table>
+        </div>
+    </div>
+    <div id="paymentHistory" class="row" style="padding-left: 25px;visibility: hidden;">
+        <div class="col-md-10">
+            <p class="page-header" style="color:wheat;">Payment History</p>
+            <table class="table">
+                <thead>
+                    <tr class="text-info">
+                        <th>Date</th>
+                        <th>Last Name</th>
+                        <th>First Name</th>
+                        <th>Receiver</th>
+                        <th>BTC Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="paymentHistoryTable"></tbody>
             </table>
         </div>
     </div>
@@ -253,7 +277,7 @@
                     xmlHttpRequest.onload = function () {
                         if (xmlHttpRequest.readyState === 4) {
                             if (xmlHttpRequest.status === 200) {
-                                alert("Thanks for signing in. Refresh site");
+                                alert(xmlHttpRequest.responseText); 
                             }
                         }
                     };
@@ -368,7 +392,8 @@
 
                             let xmlHttpRequest = XMLHTTPRequestAsync("php/setEthTransaction.php?date="
                                 + (Date.now() / 1000) + "&sender=" + wallet.address + "&ethamount="
-                                + sum + "&tokenamount=" + amount + "&startdate=" + startDate);
+                                + sum + "&tokenamount=" + amount + "&startdate=" + startDate
+                                + "&ethprice=" + ethPriceUSD + "&tokenprice=" + document.getElementById("tokenPriceUSD").innerHTML);
 
                             xmlHttpRequest.onload = function () {
                                 if (xmlHttpRequest.readyState === 4) {
@@ -537,7 +562,6 @@
                 refresh: function () {
                     getPriceUSD();
                     tokens.getTokenPrice();
-                    // this.getContractOwnerAddress();
                     this.getNumberOfAllTokens();
                     this.getNumberOfAvailableTokens();
                     this.getNumberOfSoldTokens();
@@ -595,15 +619,6 @@
                         }
                     }
                 },
-
-                //destroyContract: function () {
-                //    contract.destroyContract((error, result) => {
-                //        if (!error) {
-                //            console.log(result);
-                //        } else
-                //            console.log(error);
-                //    });
-                //}
             }
         });
 
@@ -870,13 +885,6 @@
                                 }
                             );
 
-                            //contract.getNumberOfTokens(userDataList[3], (error, tokens) => {
-                            //    if (!error) {
-                            //        cell5.innerHTML = tokens.toNumber();
-                            //    } else
-                            //        console.log(error);
-                            //});
-
                             let xmlHttpRequest = XMLHTTPRequestAsync("php/getTokenAmount.php?ethAddress=" + userDataList[3]);
 
                             xmlHttpRequest.onload = function () {
@@ -898,19 +906,20 @@
                             payButton.value = "Pay";
                             payButton.onclick = (function () {
 
-                                let xmlHttpRequest = XMLHTTPRequestAsync("php/setPaid.php?ethaddress=" + this.parentNode.parentNode.cells.item(3).innerHTML
-                                    + "&unpaid=" + this.parentNode.parentNode.cells.item(6).innerHTML
-                                    + "&paid=" + this.parentNode.parentNode.cells.item(7).innerHTML
-                                );
+                                if (Number(this.parentNode.parentNode.cells.item(7).innerHTML) > 0) {
+                                    if (confirm("Confirm payment")) {
+                                        let xmlHttpRequest = XMLHTTPRequestAsync("php/setPaid.php?ethaddress=" + this.parentNode.parentNode.cells.item(3).innerHTML);
 
-                                xmlHttpRequest.onload = function () {
-                                    if (xmlHttpRequest.readyState === 4) {
-                                        if (xmlHttpRequest.status === 200) {
-                                            alert("Payment done with success");
-                                            console.log(xmlHttpRequest.responseText);
-                                        }
+                                        xmlHttpRequest.onload = function () {
+                                            if (xmlHttpRequest.readyState === 4) {
+                                                if (xmlHttpRequest.status === 200) {
+                                                    alert("Payment done with success");
+                                                    console.log(xmlHttpRequest.responseText);
+                                                }
+                                            }
+                                        };
                                     }
-                                };
+                                } else alert("Payment cant be done - Unpaid value is 0");
 
                             });
                             cell9.appendChild(payButton);
@@ -959,10 +968,26 @@
                             let cell1 = row.insertCell(1);
                             let cell2 = row.insertCell(2);
                             let cell3 = row.insertCell(3);
+                            let cell4 = row.insertCell(4);
+                            let cell5 = row.insertCell(5);
+                            let cell6 = row.insertCell(6);
+                            let cell7 = row.insertCell(7);
+                            let cell8 = row.insertCell(8);
+
                             cell0.innerHTML = new Date(ethTransactionDataList[0] * 1000);
                             cell1.innerHTML = ethTransactionDataList[1];
                             cell2.innerHTML = ethTransactionDataList[2];
                             cell3.innerHTML = ethTransactionDataList[3];
+                            cell4.innerHTML = ethTransactionDataList[4];
+                            cell5.innerHTML = ethTransactionDataList[5];
+                            cell6.innerHTML = ethTransactionDataList[7];
+                            cell7.innerHTML = ethTransactionDataList[8];
+
+                            let currentTime = Number((Date.now() / 1000));
+                            let transactionTime = Number(ethTransactionDataList[6]);
+                            let day = (1 * 24 * 60 * 60);
+
+                            cell8.innerHTML = Math.round((currentTime - transactionTime) / day)
 
                             if (ethAddress === ethTransactionDataList[1]) {
                                 let row = ethTransactionsTable.insertRow(0);
@@ -970,11 +995,11 @@
                                 let cell1 = row.insertCell(1);
                                 let cell2 = row.insertCell(2);
                                 cell0.innerHTML = new Date(ethTransactionDataList[0] * 1000);
-                                cell1.innerHTML = ethTransactionDataList[2];
-                                cell2.innerHTML = ethTransactionDataList[3];
+                                cell1.innerHTML = ethTransactionDataList[4];
+                                cell2.innerHTML = ethTransactionDataList[5];
 
-                                tokenAmountList.push(Number(ethTransactionDataList[3]));
-                                startDateList.push(Number(ethTransactionDataList[4]));
+                                tokenAmountList.push(Number(ethTransactionDataList[5]));
+                                startDateList.push(Number(ethTransactionDataList[6]));
                             }
                         }
                     }
@@ -1066,6 +1091,40 @@
             return pucharser.ethAddress === ethAddress;
         }
 
+        function getPaymentHistory() {
+            let xmlHttpRequest = XMLHTTPRequestAsync("php/getPaymentHistory.php");
+
+            xmlHttpRequest.onload = function () {
+                if (xmlHttpRequest.readyState === 4) {
+                    if (xmlHttpRequest.status === 200) {
+                        let paymentHistoryList = xmlHttpRequest.responseText.split("^");
+                        let paymentHistoryTable = document.getElementById("paymentHistoryTable");
+
+                        for (let i = 0; i < paymentHistoryTable.rows.length; i++) {
+                            paymentHistoryTable.deleteRow(i);
+                        }
+
+                        for (let i = 0; i < paymentHistoryList.length - 1; i++) {
+                            let paymentHistoryDataList = paymentHistoryList[i].split("_");
+                            let row = paymentHistoryTable.insertRow(0);
+                            let cell0 = row.insertCell(0);
+                            let cell1 = row.insertCell(1);
+                            let cell2 = row.insertCell(2);
+                            let cell3 = row.insertCell(3);
+                            let cell4 = row.insertCell(4);
+
+                            cell0.innerHTML = new Date(paymentHistoryDataList[0] * 1000);
+                            cell1.innerHTML = paymentHistoryDataList[1];
+                            cell2.innerHTML = paymentHistoryDataList[2];
+                            cell3.innerHTML = paymentHistoryDataList[3];
+                            cell4.innerHTML = paymentHistoryDataList[4];
+
+                        }
+                    }
+                }
+            };
+        }
+
         function changeView(showStart, showSignIn, showWalletAndTokens) {
             start.show = showStart;
 
@@ -1106,13 +1165,18 @@
                 document.getElementById("transactions").style.visibility =
                     document.getElementById("addedTokens").style.visibility =
                     document.getElementById("userList").style.visibility =
-                    document.getElementById("ethTransactionList").style.visibility = "visible";
+                    document.getElementById("ethTransactionList").style.visibility =
+                    document.getElementById("paymentHistory").style.visibility = "visible";
+
+                getPaymentHistory();
 
             } else if (ethAddress !== contractOwnerAddress) {
                 ownerPanel.show = false;
+
                 document.getElementById("addedTokens").style.visibility =
                     document.getElementById("userList").style.visibility =
-                    document.getElementById("ethTransactionList").style.visibility = "hidden";
+                    document.getElementById("ethTransactionList").style.visibility =
+                    document.getElementById("paymentHistory").style.visibility = "hidden";
             }
         }
 

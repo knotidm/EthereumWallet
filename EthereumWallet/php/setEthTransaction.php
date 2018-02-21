@@ -5,6 +5,8 @@ if (isset($_GET['sender'])) $sender = $_GET['sender'];
 if (isset($_GET['ethamount'])) $ethamount = $_GET['ethamount'];
 if (isset($_GET['tokenamount'])) $tokenamount = $_GET['tokenamount'];
 if (isset($_GET['startdate'])) $startdate = $_GET['startdate'];
+if (isset($_GET['ethprice'])) $ethprice = $_GET['ethprice'];
+if (isset($_GET['tokenprice'])) $tokenprice = $_GET['tokenprice'];
 
 $host = "coinwallet.c26ysish9yud.eu-west-3.rds.amazonaws.com";
 $username = "coinwallet";
@@ -17,8 +19,8 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "INSERT INTO coinwallet.ethtransaction (date, sender, ethamount, tokenamount, startdate)
-VALUES ('$date', '$sender', '$ethamount' ,'$tokenamount', '$startdate')";
+$sql = "INSERT INTO coinwallet.ethtransaction (date, sender, ethamount, tokenamount, startdate, ethprice, tokenprice)
+VALUES ('$date', '$sender', '$ethamount' ,'$tokenamount', '$startdate', '$ethprice', '$tokenprice')";
 
 if ($conn->query($sql) === TRUE) {
     echo "New record created successfully";

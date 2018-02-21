@@ -86,6 +86,7 @@
     <Compile Include="php\getBitCoinTransactionList.php" />
     <Compile Include="php\getChargePrice.php" />
     <Compile Include="php\getDelayDays.php" />
+    <Compile Include="php\getPaymentHistory.php" />
     <Compile Include="php\getPriceUSD.php" />
     <Compile Include="php\getEthTransactionList.php" />
     <Compile Include="php\getTokenAmount.php" />
