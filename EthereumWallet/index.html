@@ -383,41 +383,7 @@
                     let amount = this.amount;
                     let sum = amount * document.getElementById("tokenPriceETH").innerHTML;
                     let etherSum = web3.toWei(sum, 'ether');
-
-                    contract.buyTokens(amount, function (error, result) {
-                        if (!error) {
-                            console.log(result);
-
-                            let startDate = (Date.now() / 1000) + (delayDays * 24 * 60 * 60);
-
-                            let xmlHttpRequest = XMLHTTPRequestAsync("php/setEthTransaction.php?date="
-                                + (Date.now() / 1000) + "&sender=" + wallet.address + "&ethamount="
-                                + sum + "&tokenamount=" + amount + "&startdate=" + startDate
-                                + "&ethprice=" + ethPriceUSD + "&tokenprice=" + document.getElementById("tokenPriceUSD").innerHTML);
-
-                            xmlHttpRequest.onload = function () {
-                                if (xmlHttpRequest.readyState === 4) {
-                                    if (xmlHttpRequest.status === 200) {
-                                        console.log(xmlHttpRequest.responseText);
-                                        this.amount = null;
-                                    }
-                                }
-                            };
-
-                            let xmlHttpRequest1 = XMLHTTPRequestAsync("php/setTokenAmount.php?ethAddress=" + ethAddress + "&tokensToAdd=" + amount);
-
-                            xmlHttpRequest1.onload = function () {
-                                if (xmlHttpRequest1.readyState === 4) {
-                                    if (xmlHttpRequest1.status === 200) {
-                                        console.log(xmlHttpRequest.responseText);
-                                    }
-                                }
-                            }
-
-                        } else
-                            console.log(error);
-                    });
-
+                  
                     web3.eth.sendTransaction({
                         from: wallet.address,
                         to: contractOwnerAddress,
@@ -426,7 +392,41 @@
                         gasPrice: 20000000000
                     }, function (error, result) {
                         if (!error) {
-                            console.log(result);
+
+                            contract.buyTokens(amount, function (error, result) {
+                                if (!error) {
+                                    console.log(result);
+
+                                    let startDate = (Date.now() / 1000) + (delayDays * 24 * 60 * 60);
+
+                                    let xmlHttpRequest = XMLHTTPRequestAsync("php/setEthTransaction.php?date="
+                                        + (Date.now() / 1000) + "&sender=" + wallet.address + "&ethamount="
+                                        + sum + "&tokenamount=" + amount + "&startdate=" + startDate
+                                        + "&ethprice=" + ethPriceUSD + "&tokenprice=" + document.getElementById("tokenPriceUSD").innerHTML);
+
+                                    xmlHttpRequest.onload = function () {
+                                        if (xmlHttpRequest.readyState === 4) {
+                                            if (xmlHttpRequest.status === 200) {
+                                                console.log(xmlHttpRequest.responseText);
+                                                this.amount = null;
+                                            }
+                                        }
+                                    };
+
+                                    let xmlHttpRequest1 = XMLHTTPRequestAsync("php/setTokenAmount.php?ethAddress=" + ethAddress + "&tokensToAdd=" + amount);
+
+                                    xmlHttpRequest1.onload = function () {
+                                        if (xmlHttpRequest1.readyState === 4) {
+                                            if (xmlHttpRequest1.status === 200) {
+                                                console.log(xmlHttpRequest.responseText);
+                                            }
+                                        }
+                                    }
+
+                                } else
+                                    console.log(error);
+                            });
+
                         }
                         else
                             console.error(error);
@@ -989,7 +989,7 @@
 
                             cell8.innerHTML = Math.round((currentTime - transactionTime) / day)
 
-                            if (ethAddress === ethTransactionDataList[1]) {
+                            if (ethAddress === ethTransactionDataList[3]) {
                                 let row = ethTransactionsTable.insertRow(0);
                                 let cell0 = row.insertCell(0);
                                 let cell1 = row.insertCell(1);

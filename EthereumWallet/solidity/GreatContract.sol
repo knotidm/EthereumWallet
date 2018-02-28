@@ -11,7 +11,7 @@ contract GreatContract {
         contractOwner = msg.sender;
         tokenPrice = 100;
         numberOfAllTokens = 72;
-        numberOfSoldTokens = 14;
+        numberOfSoldTokens = 0;
         numberOfAvailableTokens = numberOfAllTokens - numberOfSoldTokens;
     }
 
