@@ -2,7 +2,7 @@
 
 if (isset($_GET['numberOfAllTokens'])) $numberOfAllTokens = $_GET['numberOfAllTokens'];
 
-$host = "coinwallet.c26ysish9yud.eu-west-3.rds.amazonaws.com";
+$host = "coinwallet-development.c26ysish9yud.eu-west-3.rds.amazonaws.com";
 $username = "coinwallet";
 $password = "coinwallet";
 $dbname = "coinwallet";

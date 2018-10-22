@@ -1,7 +1,7 @@
 <?php
 
-if (isset($_GET['ethAddress'])) $ethAddress = $_GET['ethAddress'];
-if (isset($_GET['tokensToAdd'])) $tokensToAdd = $_GET['tokensToAdd'];
+if (isset($_GET['ethaddress'])) $ethAddress = $_GET['ethaddress'];
+if (isset($_GET['tokenstowithdraw'])) $tokensToWithdraw = $_GET['tokenstowithdraw'];
 
 $host = "coinwallet-development.c26ysish9yud.eu-west-3.rds.amazonaws.com";
 $username = "coinwallet";
@@ -27,7 +27,7 @@ if ($result->num_rows > 0) {
     echo "0 results";
 }
 
-$tokenAmount = $currentTokenAmount + intval($tokensToAdd);
+$tokenAmount = $currentTokenAmount - intval($tokensToWithdraw);
 $tokenAmountString = strval($tokenAmount);
 
 $sql1 = "UPDATE coinwallet.user SET tokenamount='$tokenAmountString' WHERE ethaddress='$ethAddress'";

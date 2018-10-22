@@ -101,5 +101,6 @@
     <Compile Include="php\setTokenAmount.php" />
     <Compile Include="php\setUnpaid.php" />
     <Compile Include="php\setUser.php" />
+    <Compile Include="php\setWithdraw.php" />
   </ItemGroup>
 </Project>

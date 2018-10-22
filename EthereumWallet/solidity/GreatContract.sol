@@ -7,7 +7,7 @@ contract GreatContract {
     uint256 private numberOfAvailableTokens;
     uint256 private numberOfSoldTokens;
 
-    function GreatContract() public {
+    constructor() public {
         contractOwner = msg.sender;
         tokenPrice = 100;
         numberOfAllTokens = 72;
@@ -23,7 +23,7 @@ contract GreatContract {
     function() external payable {
     }
 
-	function buyTokens(uint256 amount) external {
+	function buyTokens(uint256 amount) external payable {
 	    require(amount <= numberOfAvailableTokens);
         numberOfSoldTokens += amount;
         numberOfAvailableTokens -= amount;
@@ -57,6 +57,12 @@ contract GreatContract {
         require(value >= numberOfSoldTokens);
         numberOfAllTokens = value;
         numberOfAvailableTokens = numberOfAllTokens - numberOfSoldTokens;
+    }
+
+    function setNumberOfAvailableTokens(uint256 value) external OnlyContractOwner {
+        require(value <= numberOfSoldTokens);
+        numberOfAvailableTokens = numberOfAvailableTokens + value;
+        numberOfSoldTokens = numberOfAllTokens - numberOfAvailableTokens;
     }
 
     function setContractOwner(address _address) external OnlyContractOwner {

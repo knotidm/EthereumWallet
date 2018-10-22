@@ -47,11 +47,11 @@
             <br>
             <input class="input-lg" type="email" placeholder="example@gmail.com" maxlength="100" v-model="email">
         </h4>
-        <h4>
+        <!--<h4>
             <label>BTC Address</label>
             <br>
             <input class="input-lg" type="text" placeholder="" maxlength="100" v-model="btcaddress">
-        </h4>
+        </h4>-->
         <button class="btn btn-primary btn-outline" v-on:click="signIn">Sign In</button>
     </div>
 
@@ -125,7 +125,7 @@
         <div id="ownerPanel" class="col-md-6" v-if="show">
             <p class="page-header" style="color:wheat;">
                 Owner Panel
-                <button class="btn btn-primary btn-outline" v-on:click="refresh">Refresh</button>
+                <button class="btn btn-primary btn-outline" v-on:click="refreshPanel">Refresh</button>
             </p>
             <ul class="list-group">
                 <li class="list-group-item">Number Of All Tokens {{ numberOfAllTokens }}
@@ -277,7 +277,7 @@
                     xmlHttpRequest.onload = function () {
                         if (xmlHttpRequest.readyState === 4) {
                             if (xmlHttpRequest.status === 200) {
-                                alert(xmlHttpRequest.responseText); 
+                                alert(xmlHttpRequest.responseText);
                             }
                         }
                     };
@@ -311,7 +311,7 @@
                                 this.etherBalance = web3.fromWei(balance, 'ether').toNumber();
                             } else
                                 console.log(error);
-                        })
+                        });
                 },
 
                 getBitCoinBalance() {
@@ -323,7 +323,7 @@
                                 document.getElementById("bitCoinBalance").innerHTML = Number(xmlHttpRequest.responseText);
                             }
                         }
-                    }
+                    };
                 },
 
                 getNumberOfTokens() {
@@ -335,7 +335,7 @@
                                 document.getElementById("tokens").innerHTML = Number(xmlHttpRequest.responseText);
                             }
                         }
-                    }
+                    };
                 },
 
                 refresh: function () {
@@ -343,6 +343,8 @@
                     this.getEtherBalance();
                     this.getBitCoinBalance();
                     this.getNumberOfTokens();
+                    getEthTransactionList();
+                    getBitCoinTransactionList();
                 }
             }
         });
@@ -368,11 +370,6 @@
                         });
                 },
 
-                refresh: function () {
-                    getPriceUSD();
-                    this.getTokenPrice();
-                },
-
                 buyTokens: function () {
                     if (this.amount <= 0) {
                         alert('Invalid amount!');
@@ -383,7 +380,7 @@
                     let amount = this.amount;
                     let sum = amount * document.getElementById("tokenPriceETH").innerHTML;
                     let etherSum = web3.toWei(sum, 'ether');
-                  
+
                     web3.eth.sendTransaction({
                         from: wallet.address,
                         to: contractOwnerAddress,
@@ -397,7 +394,7 @@
                                 if (!error) {
                                     console.log(result);
 
-                                    let startDate = (Date.now() / 1000) + (delayDays * 24 * 60 * 60);
+                                    let startDate = (Date.now() / 1000) + (ownerPanel.delayDays * 24 * 60 * 60);
 
                                     let xmlHttpRequest = XMLHTTPRequestAsync("php/setEthTransaction.php?date="
                                         + (Date.now() / 1000) + "&sender=" + wallet.address + "&ethamount="
@@ -421,7 +418,7 @@
                                                 console.log(xmlHttpRequest.responseText);
                                             }
                                         }
-                                    }
+                                    };
 
                                 } else
                                     console.log(error);
@@ -431,6 +428,11 @@
                         else
                             console.error(error);
                     });
+                },
+
+                refresh: function () {
+                    getPriceUSD();
+                    this.getTokenPrice();
                 }
             }
         });
@@ -441,16 +443,16 @@
 
             data: {
                 show: false,
-                numberOfAllTokens: 0,
-                numberOfAvailableTokens: 0,
-                numberOfSoldTokens: 0,
+                numberOfAllTokens: null,
+                numberOfAvailableTokens: null,
+                numberOfSoldTokens: null,
                 amount: null,
                 price: null,
                 contractOwnerAddress: null,
-                delayDaysToSet: 0,
-                delayDays: 0,
-                chargePriceToSet: 0,
-                chargePrice: 0
+                delayDaysToSet: null,
+                delayDays: null,
+                chargePriceToSet: null,
+                chargePrice: null
             },
 
             methods: {
@@ -462,7 +464,7 @@
                                 this.numberOfAllTokens = allTokens.toNumber();
                             } else
                                 console.log(error);
-                        })
+                        });
                 },
 
                 getNumberOfAvailableTokens() {
@@ -472,7 +474,7 @@
                                 this.numberOfAvailableTokens = availableTokens.toNumber();
                             } else
                                 console.log(error);
-                        })
+                        });
                 },
 
                 getNumberOfSoldTokens() {
@@ -482,18 +484,20 @@
                                 this.numberOfSoldTokens = soldTokens.toNumber();
                             } else
                                 console.log(error);
-                        })
+                        });
                 },
 
-                getDelayDays() {
-                    if (this.show)
-                        this.delayDays = delayDays;
-                },
+                //getDelayDays() {
+                //    if (this.show)
+                //        getDelayDays();
+                //    //this.delayDays = delayDays;
+                //},
 
-                getChargePrice() {
-                    if (this.show)
-                        this.chargePrice = chargePrice;
-                },
+                //getChargePrice() {
+                //    if (this.show)
+                //        getChargePrice();
+                //    //this.chargePrice = chargePrice;
+                //},
 
                 setTokenPrice: function () {
                     if (this.price <= 0) {
@@ -539,34 +543,25 @@
                                 }
                             };
 
-                            let xmlHttpRequest2 = XMLHTTPRequestAsync("php/setNumberOfAllTokens.php?numberOfAllTokens=" + amountTemp);
+                            //let xmlHttpRequest2 = XMLHTTPRequestAsync("php/setNumberOfAllTokens.php?numberOfAllTokens=" + amountTemp);
 
-                            xmlHttpRequest2.onload = function () {
-                                if (xmlHttpRequest2.readyState === 4) {
-                                    if (xmlHttpRequest2.status === 200) {
-                                        alert(xmlHttpRequest2.responseText);
-                                    }
-                                }
-                            }
+                            //xmlHttpRequest2.onload = function () {
+                            //    if (xmlHttpRequest2.readyState === 4) {
+                            //        if (xmlHttpRequest2.status === 200) {
+                            //            alert(xmlHttpRequest2.responseText);
+                            //        }
+                            //    }
+                            //};
 
                             console.log(result);
                             this.getNumberOfAllTokens();
                             this.getNumberOfAvailableTokens();
                             this.getNumberOfSoldTokens();
+                            getAddedTokens();
                             this.amount = null;
                         } else
                             console.log(error);
                     });
-                },
-
-                refresh: function () {
-                    getPriceUSD();
-                    tokens.getTokenPrice();
-                    this.getNumberOfAllTokens();
-                    this.getNumberOfAvailableTokens();
-                    this.getNumberOfSoldTokens();
-                    this.getDelayDays();
-                    this.getChargePrice();
                 },
 
                 setContractOwner: function () {
@@ -585,7 +580,7 @@
                 },
 
                 setDelayDays: function () {
-                    if (this.delayDaysToSet <= 0) {
+                    if (this.delayDaysToSet < 0) {
                         alert('Invalid amount!');
                         this.delayDaysToSet = null;
                         return;
@@ -597,9 +592,11 @@
                         if (xmlHttpRequest.readyState === 4) {
                             if (xmlHttpRequest.status === 200) {
                                 alert(xmlHttpRequest.responseText);
+                                getDelayDays();
                             }
                         }
-                    }
+                    };
+
                 },
 
                 setChargePrice: function () {
@@ -615,10 +612,25 @@
                         if (xmlHttpRequest.readyState === 4) {
                             if (xmlHttpRequest.status === 200) {
                                 alert(xmlHttpRequest.responseText);
+                                getChargePrice();
                             }
                         }
-                    }
+                    };
                 },
+
+                refreshPanel: function () {
+                    getPriceUSD();
+                    tokens.getTokenPrice();
+                    this.getNumberOfAllTokens();
+                    this.getNumberOfAvailableTokens();
+                    this.getNumberOfSoldTokens();
+                    getDelayDays();
+                    getChargePrice();
+                    getUserList();
+                    getEthTransactionList();
+                    //getAddedTokens();
+                    getBitCoinTransactionList();
+                }
             }
         });
 
@@ -627,7 +639,7 @@
         }
 
         const config = {
-            contractAddress: '0x3B7e09145118D69dc23c0C2BED7D2E6b88C79359',
+            contractAddress: '0x206d0480b9af8348ebec37a56fc65e02f1d4a906',
             contractAbi: [
                 {
                     "constant": true,
@@ -653,8 +665,8 @@
                     ],
                     "name": "buyTokens",
                     "outputs": [],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
+                    "payable": true,
+                    "stateMutability": "payable",
                     "type": "function"
                 },
                 {
@@ -708,6 +720,20 @@
                         }
                     ],
                     "name": "setTokenPrice",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "setNumberOfAvailableTokens",
                     "outputs": [],
                     "payable": false,
                     "stateMutability": "nonpayable",
@@ -777,8 +803,8 @@
         let btcPriceUSD = 0;
         let ethPriceUSD = 0;
         let contractOwnerAddress = "";
-        let delayDays = 0;
-        let chargePrice = 0;
+        //let delayDays = 0;
+        //let chargePrice = 0;
         let pucharsers = [];
         let tokenAmountList = [];
         let startDateList = [];
@@ -824,7 +850,7 @@
             xmlHttpRequest.onload = function () {
                 if (xmlHttpRequest.readyState === 4) {
                     if (xmlHttpRequest.status === 200) {
-                        delayDays = Number(xmlHttpRequest.responseText);
+                        ownerPanel.delayDays = Number(xmlHttpRequest.responseText);
                     }
                 }
             }
@@ -836,7 +862,7 @@
             xmlHttpRequest.onload = function () {
                 if (xmlHttpRequest.readyState === 4) {
                     if (xmlHttpRequest.status === 200) {
-                        chargePrice = Number(xmlHttpRequest.responseText);
+                        ownerPanel.chargePrice = Number(xmlHttpRequest.responseText);
                     }
                 }
             }
@@ -870,6 +896,8 @@
                             let cell7 = row.insertCell(7);
                             let cell8 = row.insertCell(8);
                             let cell9 = row.insertCell(9);
+                            let cell10 = row.insertCell(10);
+                            let cell11 = row.insertCell(11);
 
                             cell0.innerHTML = userDataList[0];
                             cell1.innerHTML = userDataList[1];
@@ -923,6 +951,46 @@
 
                             });
                             cell9.appendChild(payButton);
+
+                            var withdrawInputField = document.createElement('input');
+                            withdrawInputField.type = "number";
+                            withdrawInputField.className = "input-lg";
+                            withdrawInputField.value = 0;
+                            cell11.appendChild(withdrawInputField);
+
+                            var withdrawButton = document.createElement('input');
+                            withdrawButton.type = "button";
+                            withdrawButton.className = "btn btn-primary btn-outline";
+                            withdrawButton.value = "Withdraw tokens";
+                            withdrawButton.onclick = (function () {
+                                let withdrawValue = withdrawInputField.value;
+                                if (Number(this.parentNode.parentNode.cells.item(5).innerHTML) >= withdrawValue && withdrawValue > 0) {
+                                    if (confirm("Confirm withdraw")) {
+
+                                        contract.setNumberOfAvailableTokens(withdrawValue, (error, result) => {
+                                            if (!error) {
+
+                                                let xmlHttpRequest = XMLHTTPRequestAsync("php/setWithdraw.php?ethaddress=" + this.parentNode.parentNode.cells.item(3).innerHTML + "&tokenstowithdraw=" + withdrawValue);
+
+                                                xmlHttpRequest.onload = function () {
+                                                    if (xmlHttpRequest.readyState === 4) {
+                                                        if (xmlHttpRequest.status === 200) {
+                                                            alert("Withdraw done with success");
+                                                            console.log(xmlHttpRequest.responseText);
+                                                        }
+                                                    }
+                                                };
+
+                                                console.log(result);
+
+                                            } else
+                                                console.log(error);
+                                        });
+                                    }
+                                } else alert("Withdraw cant be done - wrong Tokens amount to withdraw");
+
+                            });
+                            cell10.appendChild(withdrawButton);
                         }
 
                         if (!ethAddress) {
@@ -1159,8 +1227,8 @@
                 ownerPanel.getNumberOfAllTokens();
                 ownerPanel.getNumberOfAvailableTokens();
                 ownerPanel.getNumberOfSoldTokens();
-                ownerPanel.getDelayDays();
-                ownerPanel.getChargePrice();
+                getDelayDays();
+                getChargePrice();
 
                 document.getElementById("transactions").style.visibility =
                     document.getElementById("addedTokens").style.visibility =
