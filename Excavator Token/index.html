@@ -629,8 +629,22 @@
         }
 
         const config = {
-            contractAddress: '0x65e1725fddf82f54b2b2c0df15e75e866114fc6a',
+            contractAddress: '0x5ad83bffbb3b1030caca8a4d500d9d043605795d',
             contractAbi: [
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "getNumberOfSoldTokens",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
                 {
                     "constant": false,
                     "inputs": [
@@ -643,6 +657,76 @@
                     "outputs": [],
                     "payable": true,
                     "stateMutability": "payable",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "getNumberOfAllTokens",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "getContractOwner",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "getTokenPrice",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "setTokenPrice",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "setNumberOfAvailableTokens",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
                     "type": "function"
                 },
                 {
@@ -674,73 +758,6 @@
                     "type": "function"
                 },
                 {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "value",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "setNumberOfAvailableTokens",
-                    "outputs": [],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "value",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "setTokenPrice",
-                    "outputs": [],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "payable": true,
-                    "stateMutability": "payable",
-                    "type": "fallback"
-                },
-                {
-                    "inputs": [],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "constructor"
-                },
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "getContractOwner",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "address"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "getNumberOfAllTokens",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
                     "constant": true,
                     "inputs": [],
                     "name": "getNumberOfAvailableTokens",
@@ -755,32 +772,15 @@
                     "type": "function"
                 },
                 {
-                    "constant": true,
                     "inputs": [],
-                    "name": "getNumberOfSoldTokens",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
                     "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
+                    "stateMutability": "nonpayable",
+                    "type": "constructor"
                 },
                 {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "getTokenPrice",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
+                    "payable": true,
+                    "stateMutability": "payable",
+                    "type": "fallback"
                 }
             ]
         };
@@ -1247,32 +1247,32 @@
             }
         }
 
-        //function setBalance() {
-        //    let xmlHttpRequest = XMLHTTPRequestAsync("php/setBalance.php");
-        
-        //    xmlHttpRequest.onload = function () {
-        //        if (xmlHttpRequest.readyState === 4) {
-        //            if (xmlHttpRequest.status === 200) {
-        //                console.log(xmlHttpRequest.responseText);
-        //            }
-        //        }
-        //    }
-        //}
-        
-        //function setUnpaid() {
-        //    let xmlHttpRequest = XMLHTTPRequestAsync("php/setUnpaid.php");
-        
-        //    xmlHttpRequest.onload = function () {
-        //        if (xmlHttpRequest.readyState === 4) {
-        //            if (xmlHttpRequest.status === 200) {
-        //                console.log(xmlHttpRequest.responseText);
-        //            }
-        //        }
-        //    }
-        //}
-        
-        //setBalance();
-        //setUnpaid();
+            //function setBalance() {
+            //    let xmlHttpRequest = XMLHTTPRequestAsync("php/setBalance.php");
+
+            //    xmlHttpRequest.onload = function () {
+            //        if (xmlHttpRequest.readyState === 4) {
+            //            if (xmlHttpRequest.status === 200) {
+            //                console.log(xmlHttpRequest.responseText);
+            //            }
+            //        }
+            //    }
+            //}
+
+            //function setUnpaid() {
+            //    let xmlHttpRequest = XMLHTTPRequestAsync("php/setUnpaid.php");
+
+            //    xmlHttpRequest.onload = function () {
+            //        if (xmlHttpRequest.readyState === 4) {
+            //            if (xmlHttpRequest.status === 200) {
+            //                console.log(xmlHttpRequest.responseText);
+            //            }
+            //        }
+            //    }
+            //}
+
+            //setBalance();
+            //setUnpaid();
     </script>
 
 </body>
