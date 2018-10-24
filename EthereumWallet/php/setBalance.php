@@ -65,7 +65,8 @@ for ($i = 0; $i < count($users); $i++) {
             $ethTransaction = $ethTransactions[$k];
 
             if (floatval($bitCoinTransaction['date']) >= floatval($ethTransaction['startdate'])
-                && strval($ethTransaction['sender']) == strval($user['ethaddress']))
+                && strval($ethTransaction['sender']) == strval($user['ethaddress']) 
+                && floatval($bitCoinTransaction['payment']) > floatval($bitCoinTransaction['charge']))
             {
                 $balance += ((floatval($bitCoinTransaction['payment']) - floatval($bitCoinTransaction['charge']) ) / $numberOfAllTokens ) * floatval($ethTransaction['tokenamount']);
                 $balanceString = strval($balance);

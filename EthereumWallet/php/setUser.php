@@ -67,17 +67,17 @@ VALUES ('$firstname', '$lastname', '$email', '$ethaddress', '0', '0', '0', '$btc
 
 if (validateemail($email)) {
 	if ($conn->query($sql) === TRUE) {
-		echo "Thanks for signing in. Refresh site. ";
+        if ( validatebtcaddress($btcaddress)){
+            if ($conn->query($sql) === TRUE) {
+                echo "Thanks for signing in. Refresh site. ";
+            } else {
+                echo "Error: " . $sql . "<br>" . $conn->error;
+            }
+        } else echo "Wrong BTC Address. ";
 	} else {
 		echo "Error: " . $sql . "<br>" . $conn->error;
 	}
-	//if ( validatebtcaddress($btcaddress)){
-	//    if ($conn->query($sql) === TRUE) {
-	//        echo "Thanks for signing in. Refresh site. ";
-	//    } else {
-	//        echo "Error: " . $sql . "<br>" . $conn->error;
-	//    }
-	//} else echo "Wrong BTC Address. ";
+
 } else echo "Wrong Email Address. ";
 
 $conn->close();

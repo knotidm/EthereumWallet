@@ -47,11 +47,11 @@
             <br>
             <input class="input-lg" type="email" placeholder="example@gmail.com" maxlength="100" v-model="email">
         </h4>
-        <!--<h4>
+        <h4>
             <label>BTC Address</label>
             <br>
             <input class="input-lg" type="text" placeholder="" maxlength="100" v-model="btcaddress">
-        </h4>-->
+        </h4>
         <button class="btn btn-primary btn-outline" v-on:click="signIn">Sign In</button>
     </div>
 
@@ -62,8 +62,8 @@
                 <button class="btn btn-primary btn-outline" v-on:click="refresh">Refresh</button>
             </p>
             <ul class="list-group">
-                <li class="list-group-item">Address {{ address }}
-                <li class="list-group-item">Ether Balance {{ etherBalance }}
+                <li class="list-group-item">ETH Address {{ address }}
+                <li class="list-group-item">ETH Balance {{ etherBalance }}
                 <li class="list-group-item">BitCoin Balance <p id="bitCoinBalance"></p>
                 <li class="list-group-item">
                     Number Of Tokens <p id="tokens"></p>
@@ -209,11 +209,11 @@
                         <th>Date</th>
                         <th>First Name</th>
                         <th>Last Name</th>
-                        <th>Sender</th>
+                        <th>Sender ETH Address</th>
                         <th>ETH Amount</th>
                         <th>Token Amount</th>
                         <th>ETH Price</th>
-                        <th>Token Price</th>
+                        <th>Token Price (USD)</th>
                         <th>Mining days</th>
                     </tr>
                 </thead>
@@ -406,6 +406,8 @@
                                             if (xmlHttpRequest.status === 200) {
                                                 console.log(xmlHttpRequest.responseText);
                                                 this.amount = null;
+                                                getEthTransactionList();
+                                                wallet.getNumberOfTokens();
                                             }
                                         }
                                     };
@@ -487,18 +489,6 @@
                         });
                 },
 
-                //getDelayDays() {
-                //    if (this.show)
-                //        getDelayDays();
-                //    //this.delayDays = delayDays;
-                //},
-
-                //getChargePrice() {
-                //    if (this.show)
-                //        getChargePrice();
-                //    //this.chargePrice = chargePrice;
-                //},
-
                 setTokenPrice: function () {
                     if (this.price <= 0) {
                         alert('Invalid amount!');
@@ -511,7 +501,7 @@
                             console.log(result);
 
                             tokens.getTokenPrice();
-                            getEthereumInfo();
+                            getPriceUSD();
                             this.price = null;
 
                         } else
@@ -543,15 +533,15 @@
                                 }
                             };
 
-                            //let xmlHttpRequest2 = XMLHTTPRequestAsync("php/setNumberOfAllTokens.php?numberOfAllTokens=" + amountTemp);
+                            let xmlHttpRequest2 = XMLHTTPRequestAsync("php/setNumberOfAllTokens.php?numberOfAllTokens=" + amountTemp);
 
-                            //xmlHttpRequest2.onload = function () {
-                            //    if (xmlHttpRequest2.readyState === 4) {
-                            //        if (xmlHttpRequest2.status === 200) {
-                            //            alert(xmlHttpRequest2.responseText);
-                            //        }
-                            //    }
-                            //};
+                            xmlHttpRequest2.onload = function () {
+                                if (xmlHttpRequest2.readyState === 4) {
+                                    if (xmlHttpRequest2.status === 200) {
+                                        alert(xmlHttpRequest2.responseText);
+                                    }
+                                }
+                            };
 
                             console.log(result);
                             this.getNumberOfAllTokens();
@@ -628,7 +618,7 @@
                     getChargePrice();
                     getUserList();
                     getEthTransactionList();
-                    //getAddedTokens();
+                    getAddedTokens();
                     getBitCoinTransactionList();
                 }
             }
@@ -639,22 +629,8 @@
         }
 
         const config = {
-            contractAddress: '0x206d0480b9af8348ebec37a56fc65e02f1d4a906',
+            contractAddress: '0x65e1725fddf82f54b2b2c0df15e75e866114fc6a',
             contractAbi: [
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "getNumberOfSoldTokens",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
                 {
                     "constant": false,
                     "inputs": [
@@ -667,76 +643,6 @@
                     "outputs": [],
                     "payable": true,
                     "stateMutability": "payable",
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "getNumberOfAllTokens",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "getContractOwner",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "address"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "getTokenPrice",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                },
-                {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "value",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "setTokenPrice",
-                    "outputs": [],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "value",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "setNumberOfAvailableTokens",
-                    "outputs": [],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
                     "type": "function"
                 },
                 {
@@ -768,6 +674,73 @@
                     "type": "function"
                 },
                 {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "setNumberOfAvailableTokens",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "setTokenPrice",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "payable": true,
+                    "stateMutability": "payable",
+                    "type": "fallback"
+                },
+                {
+                    "inputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "constructor"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "getContractOwner",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "getNumberOfAllTokens",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
                     "constant": true,
                     "inputs": [],
                     "name": "getNumberOfAvailableTokens",
@@ -782,15 +755,32 @@
                     "type": "function"
                 },
                 {
+                    "constant": true,
                     "inputs": [],
+                    "name": "getNumberOfSoldTokens",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
                     "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "constructor"
+                    "stateMutability": "view",
+                    "type": "function"
                 },
                 {
-                    "payable": true,
-                    "stateMutability": "payable",
-                    "type": "fallback"
+                    "constant": true,
+                    "inputs": [],
+                    "name": "getTokenPrice",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
                 }
             ]
         };
@@ -803,8 +793,6 @@
         let btcPriceUSD = 0;
         let ethPriceUSD = 0;
         let contractOwnerAddress = "";
-        //let delayDays = 0;
-        //let chargePrice = 0;
         let pucharsers = [];
         let tokenAmountList = [];
         let startDateList = [];
@@ -819,8 +807,8 @@
         getBitCoinTransactionList();
 
         function getPriceUSD() {
-
             let xmlHttpRequest = XMLHTTPRequestAsync("php/getPriceUSD.php");
+
             xmlHttpRequest.onload = function () {
                 if (xmlHttpRequest.readyState === 4) {
                     if (xmlHttpRequest.status === 200) {
@@ -868,18 +856,25 @@
             }
         }
 
+        function clearTable(table) {
+            if (table.rows.length > 0) {
+                for (let i = 0; i <= table.rows.length; i++) {
+                    table.deleteRow(0);
+                }
+            }
+        }
+
         function getUserList() {
             let xmlHttpRequest = XMLHTTPRequestAsync("php/getUserList.php");
 
             xmlHttpRequest.onload = function () {
                 if (xmlHttpRequest.readyState === 4) {
                     if (xmlHttpRequest.status === 200) {
+
                         let userList = xmlHttpRequest.responseText.split("^");
                         let userTable = document.getElementById("userListTable");
 
-                        for (let i = 0; i < userTable.rows.length; i++) {
-                            userTable.deleteRow(i);
-                        }
+                        clearTable(userTable);
 
                         pucharsers = [];
 
@@ -943,6 +938,7 @@
                                                 if (xmlHttpRequest.status === 200) {
                                                     alert("Payment done with success");
                                                     console.log(xmlHttpRequest.responseText);
+                                                    getUserList();
                                                 }
                                             }
                                         };
@@ -976,6 +972,19 @@
                                                     if (xmlHttpRequest.readyState === 4) {
                                                         if (xmlHttpRequest.status === 200) {
                                                             alert("Withdraw done with success");
+                                                            console.log(xmlHttpRequest.responseText);
+                                                        }
+                                                    }
+                                                };
+
+                                                let xmlHttpRequest1 = XMLHTTPRequestAsync("php/setEthTransaction.php?date="
+                                                    + (Date.now() / 1000) + "&sender=" + this.parentNode.parentNode.cells.item(3).innerHTML + "&ethamount="
+                                                    + 0 + "&tokenamount=" + (-withdrawValue) + "&startdate=" + (Date.now() / 1000)
+                                                    + "&ethprice=" + ethPriceUSD + "&tokenprice=" + document.getElementById("tokenPriceUSD").innerHTML);
+
+                                                xmlHttpRequest1.onload = function () {
+                                                    if (xmlHttpRequest.readyState === 4) {
+                                                        if (xmlHttpRequest.status === 200) {
                                                             console.log(xmlHttpRequest.responseText);
                                                         }
                                                     }
@@ -1019,12 +1028,8 @@
                         let ethTransactionListTable = document.getElementById("ethTransactionListTable");
                         let ethTransactionsTable = document.getElementById("ethTransactionsTable");
 
-                        for (let i = 0; i < ethTransactionListTable.rows.length; i++) {
-                            ethTransactionListTable.deleteRow(i);
-                        }
-                        for (let i = 0; i < ethTransactionsTable.rows.length; i++) {
-                            ethTransactionsTable.deleteRow(i);
-                        }
+                        clearTable(ethTransactionListTable);
+                        clearTable(ethTransactionsTable);
 
                         tokenAmountList = [];
                         startDateList = [];
@@ -1085,9 +1090,7 @@
                         let addedTokensList = xmlHttpRequest.responseText.split("^");
                         let addedTokensTable = document.getElementById("addedTokensTable");
 
-                        for (let i = 0; i < addedTokensTable.rows.length; i++) {
-                            addedTokensTable.deleteRow(i);
-                        }
+                        clearTable(addedTokensTable);
 
                         for (let i = 0; i < addedTokensList.length - 1; i++) {
                             let ethTransactionDataList = addedTokensList[i].split("_");
@@ -1103,7 +1106,6 @@
         }
 
         function getBitCoinTransactionList() {
-
             let xmlHttpRequest = XMLHTTPRequestAsync("php/getBitCoinTransactionList.php");
 
             xmlHttpRequest.onload = function () {
@@ -1112,9 +1114,7 @@
                         let bitCoinTransactionsList = xmlHttpRequest.responseText.split("^");
                         let bitCoinTransactionsTable = document.getElementById("bitCoinTransactionsTable");
 
-                        for (let i = 0; i < bitCoinTransactionsTable.rows.length; i++) {
-                            bitCoinTransactionsTable.deleteRow(i);
-                        }
+                        clearTable(bitCoinTransactionsTable);
 
                         contract.getNumberOfAllTokens((error, allTokens) => {
                             if (!error) {
@@ -1127,15 +1127,16 @@
                                     for (let l = 0; l < tokenAmountList.length; l++) {
 
                                         if (Number(bitCoinTransactionsDataList[0]) >= startDateList[l]) {
+                                            if (Number(bitCoinTransactionsDataList[1]) > Number(bitCoinTransactionsDataList[3])) {
 
-                                            let row = bitCoinTransactionsTable.insertRow(0);
-                                            let cell0 = row.insertCell(0);
-                                            let cell1 = row.insertCell(1);
-                                            let cell2 = row.insertCell(2);
-
-                                            cell0.innerHTML = new Date(bitCoinTransactionsDataList[0] * 1000);
-                                            cell1.innerHTML = ((Number(bitCoinTransactionsDataList[1]) - Number(bitCoinTransactionsDataList[3])) / numberOfAllTokens) * tokenAmountList[l];
-                                            cell2.innerHTML = (Number(bitCoinTransactionsDataList[2]) / numberOfAllTokens) * tokenAmountList[l];
+                                                let row = bitCoinTransactionsTable.insertRow(0);
+                                                let cell0 = row.insertCell(0);
+                                                let cell1 = row.insertCell(1);
+                                                let cell2 = row.insertCell(2);
+                                                cell0.innerHTML = new Date(bitCoinTransactionsDataList[0] * 1000);
+                                                cell1.innerHTML = ((Number(bitCoinTransactionsDataList[1]) - Number(bitCoinTransactionsDataList[3])) / numberOfAllTokens) * tokenAmountList[l];
+                                                cell2.innerHTML = (Number(bitCoinTransactionsDataList[2]) / numberOfAllTokens) * tokenAmountList[l];
+                                            }
                                         }
                                     }
                                 }
@@ -1168,9 +1169,7 @@
                         let paymentHistoryList = xmlHttpRequest.responseText.split("^");
                         let paymentHistoryTable = document.getElementById("paymentHistoryTable");
 
-                        for (let i = 0; i < paymentHistoryTable.rows.length; i++) {
-                            paymentHistoryTable.deleteRow(i);
-                        }
+                        clearTable(paymentHistoryTable);
 
                         for (let i = 0; i < paymentHistoryList.length - 1; i++) {
                             let paymentHistoryDataList = paymentHistoryList[i].split("_");
@@ -1248,6 +1247,32 @@
             }
         }
 
+        //function setBalance() {
+        //    let xmlHttpRequest = XMLHTTPRequestAsync("php/setBalance.php");
+        
+        //    xmlHttpRequest.onload = function () {
+        //        if (xmlHttpRequest.readyState === 4) {
+        //            if (xmlHttpRequest.status === 200) {
+        //                console.log(xmlHttpRequest.responseText);
+        //            }
+        //        }
+        //    }
+        //}
+        
+        //function setUnpaid() {
+        //    let xmlHttpRequest = XMLHTTPRequestAsync("php/setUnpaid.php");
+        
+        //    xmlHttpRequest.onload = function () {
+        //        if (xmlHttpRequest.readyState === 4) {
+        //            if (xmlHttpRequest.status === 200) {
+        //                console.log(xmlHttpRequest.responseText);
+        //            }
+        //        }
+        //    }
+        //}
+        
+        //setBalance();
+        //setUnpaid();
     </script>
 
 </body>
