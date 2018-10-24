@@ -6,7 +6,7 @@ if (isset($_GET['email'])) $email = $_GET['email'];
 if (isset($_GET['ethaddress'])) $ethaddress = $_GET['ethaddress'];
 if (isset($_GET['btcaddress'])) $btcaddress = $_GET['btcaddress'];
 
-$host = "coinwallet-development.c26ysish9yud.eu-west-3.rds.amazonaws.com";
+$host = "coinwallet.c26ysish9yud.eu-west-3.rds.amazonaws.com";
 $username = "coinwallet";
 $password = "coinwallet";
 $dbname = "coinwallet";

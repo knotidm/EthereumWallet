@@ -3,7 +3,7 @@
 if (isset($_GET['ethaddress'])) $ethAddress = $_GET['ethaddress'];
 if (isset($_GET['tokenstowithdraw'])) $tokensToWithdraw = $_GET['tokenstowithdraw'];
 
-$host = "coinwallet-development.c26ysish9yud.eu-west-3.rds.amazonaws.com";
+$host = "coinwallet.c26ysish9yud.eu-west-3.rds.amazonaws.com";
 $username = "coinwallet";
 $password = "coinwallet";
 $dbname = "coinwallet";

@@ -3,7 +3,7 @@
 if (isset($_GET['ethAddress'])) $ethAddress = $_GET['ethAddress'];
 if (isset($_GET['tokensToAdd'])) $tokensToAdd = $_GET['tokensToAdd'];
 
-$host = "coinwallet-development.c26ysish9yud.eu-west-3.rds.amazonaws.com";
+$host = "coinwallet.c26ysish9yud.eu-west-3.rds.amazonaws.com";
 $username = "coinwallet";
 $password = "coinwallet";
 $dbname = "coinwallet";

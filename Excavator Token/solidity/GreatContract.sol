@@ -9,9 +9,9 @@ contract GreatContract {
 
     constructor() public {
         contractOwner = msg.sender;
-        tokenPrice = 100;
-        numberOfAllTokens = 72;
-        numberOfSoldTokens = 0;
+        tokenPrice = 115;
+        numberOfAllTokens = 90;
+        numberOfSoldTokens = 28;
         numberOfAvailableTokens = numberOfAllTokens - numberOfSoldTokens;
     }
 

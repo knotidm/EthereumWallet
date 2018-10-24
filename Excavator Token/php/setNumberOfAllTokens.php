@@ -1,8 +1,8 @@
 <?php
 
-if (isset($_GET['delayDays'])) $delayDays = $_GET['delayDays'];
+if (isset($_GET['numberOfAllTokens'])) $numberOfAllTokens = $_GET['numberOfAllTokens'];
 
-$host = "coinwallet-development.c26ysish9yud.eu-west-3.rds.amazonaws.com";
+$host = "coinwallet.c26ysish9yud.eu-west-3.rds.amazonaws.com";
 $username = "coinwallet";
 $password = "coinwallet";
 $dbname = "coinwallet";
@@ -13,7 +13,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "UPDATE coinwallet.delaydays SET delaydays='$delayDays' WHERE id='1'";
+$sql = "UPDATE coinwallet.chargeprice SET numberofalltokens='$numberOfAllTokens' WHERE id='1'";
 
 if ($conn->query($sql) === TRUE) {
     echo "New record created successfully";

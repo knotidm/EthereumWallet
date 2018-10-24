@@ -16,7 +16,7 @@ $result2 = $json2[0];
 
 $priceUSD = floatval($result2['price_usd']);
 
-$host = "coinwallet-development.c26ysish9yud.eu-west-3.rds.amazonaws.com";
+$host = "coinwallet.c26ysish9yud.eu-west-3.rds.amazonaws.com";
 $username = "coinwallet";
 $password = "coinwallet";
 $dbname = "coinwallet";
