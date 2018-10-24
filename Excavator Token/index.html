@@ -959,7 +959,8 @@
                             withdrawButton.className = "btn btn-primary btn-outline";
                             withdrawButton.value = "Withdraw tokens";
                             withdrawButton.onclick = (function () {
-                                let withdrawValue = withdrawInputField.value;
+
+                                let withdrawValue = this.parentNode.parentNode.cells.item(11).childNodes[0].value;
                                 if (Number(this.parentNode.parentNode.cells.item(5).innerHTML) >= withdrawValue && withdrawValue > 0) {
                                     if (confirm("Confirm withdraw")) {
 
@@ -1247,32 +1248,32 @@
             }
         }
 
-            //function setBalance() {
-            //    let xmlHttpRequest = XMLHTTPRequestAsync("php/setBalance.php");
+                //function setBalance() {
+                //    let xmlHttpRequest = XMLHTTPRequestAsync("php/setBalance.php");
 
-            //    xmlHttpRequest.onload = function () {
-            //        if (xmlHttpRequest.readyState === 4) {
-            //            if (xmlHttpRequest.status === 200) {
-            //                console.log(xmlHttpRequest.responseText);
-            //            }
-            //        }
-            //    }
-            //}
+                //    xmlHttpRequest.onload = function () {
+                //        if (xmlHttpRequest.readyState === 4) {
+                //            if (xmlHttpRequest.status === 200) {
+                //                console.log(xmlHttpRequest.responseText);
+                //            }
+                //        }
+                //    }
+                //}
 
-            //function setUnpaid() {
-            //    let xmlHttpRequest = XMLHTTPRequestAsync("php/setUnpaid.php");
+                //function setUnpaid() {
+                //    let xmlHttpRequest = XMLHTTPRequestAsync("php/setUnpaid.php");
 
-            //    xmlHttpRequest.onload = function () {
-            //        if (xmlHttpRequest.readyState === 4) {
-            //            if (xmlHttpRequest.status === 200) {
-            //                console.log(xmlHttpRequest.responseText);
-            //            }
-            //        }
-            //    }
-            //}
+                //    xmlHttpRequest.onload = function () {
+                //        if (xmlHttpRequest.readyState === 4) {
+                //            if (xmlHttpRequest.status === 200) {
+                //                console.log(xmlHttpRequest.responseText);
+                //            }
+                //        }
+                //    }
+                //}
 
-            //setBalance();
-            //setUnpaid();
+                //setBalance();
+                //setUnpaid();
     </script>
 
 </body>
